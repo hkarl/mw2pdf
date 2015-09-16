@@ -39,7 +39,8 @@ per document
 * For each document mentioned in the documentlist, there will be a
   file .pdf uploaded and a page with the name of documnet and
   BuildReport added. 
-* BuildReports contains error messages as well as a link to the PDF.
+* BuildReports contains error messages as well as a link to the
+  PDF. They are also added to a category BuildReport 
 * They also have a link to the generated and uploaded PDF. 
 
 ## TODOs
