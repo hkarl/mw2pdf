@@ -1,0 +1,104 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Put information about the document here
+% Ensure that this is used in title page and headings 
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newboolean{final}
+\setboolean{final}{false}	% change this for release
+
+\newboolean{deliverable}
+\setboolean{deliverable}{true}	% change this for milestone document
+
+\ifthenelse{\boolean{deliverable}}{
+  \newcommand*{\dt}{D}}{
+  \newcommand*{\dt}{M}
+}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% use fixme and changes packages
+% DON'T TOUCH
+%
+
+\ifthenelse{\boolean{final}}{
+  \usepackage[final]{fixme}
+  \usepackage[final]{changes}
+}{
+  \usepackage[draft,marginclue,footnote]{fixme}
+  \usepackage{changes}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Start changing here again
+%
+\newcommand{\projectNumber}{SONATA}
+\newcommand{\docNumber}{\dt~2.4}
+\newcommand{\docTitle}{TITLE TO BE DEFINED}
+\newcommand{\docSecurity}{Confidential}
+\newcommand{\docTargetDissLevel}{CO}
+\newcommand{\docStatus}{In progress}
+\newcommand{\docDate}{\today}     % change this, once stable 
+
+%----------------------------------------------------------------
+\newcommand{\docVersion}{0.02, \thistime{}}  
+%----------------------------------------------------------------
+
+\newcommand{\docResponsible}{XXX}
+\newcommand{\docEditors}{XXXX}
+\newcommand{\docReviewed}{xx (YY) \& xx (YY)}
+\newcommand{\docAuthors}{XXX
+}
+
+% add revision history here - probably don't want to display this for final version 
+\newcommand{\docRevisionHistory}{
+Revision & Date & Issued by & Description \\  
+\hline
+}
+
+\newcommand{\docKeywords}{XXX}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% FIXME and CHANGES for collaborative editing
+%
+% for multiple authors to leave fixme's in the text, it is useful to
+% introduce macros for each author
+% duplicate the following line for each author; here, initials are
+% used but that can be individually decided 
+% (example: Holger Karl HK) 
+% Feel free to add your own initials here 
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\fmhkn}[1]{\fixme{[HK] #1}}
+\newcommand{\fmpaag}[1]{\fixme{[PA] #1}}
+\newcommand{\fmers}[1]{\fixme{[ER] #1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% for multiple authors to track changes the text, it is useful to
+% introduce macros for each author
+% duplicate the following line for each author
+% Feel free to add yourself here and, maybe, change the colour 
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definechangesauthor[color=blue,name={Holger Karl}]{HK}
+\definechangesauthor[color=olive,name={Pedro A. Aranda}]{PA}
+
+%%%%%%%%%%%%%%%%%%%%%%
+% Things that happen when the final flag is true: 
+%%% Once you set the "final" flag above, this will become version 1.0: 
+%%% and the revision history is gone
+\ifthenelse{\boolean{final}}{
+  \renewcommand{\docStatus}{Final}
+  \renewcommand{\docVersion}{1.0} 
+  \renewcommand{\docSecurity}{Public}
+  \renewcommand{\docTargetDissLevel}{PU}
+  \renewcommand{\docDate}{\date{01 january 2014}}     % change this, once stable 
+  \renewcommand{\docRevisionHistory}{
+    Version & Date & Issued by & \\  \hline
+  }
+}{}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End: 

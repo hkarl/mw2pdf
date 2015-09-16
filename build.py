@@ -39,7 +39,7 @@ def linesFromBulletlist(t):
     return r
     
 def download(target, output, category=None):
-    # return
+    return
     wikiFetcher.download(host=config.WIKIROOT,
                          target=target,
                          user=config.USER,
@@ -117,6 +117,7 @@ def processPandoc(doc, directory):
                               format='mediawiki',
                               to='latex',
                               filters=filters,
+                              extra_args=['--chapters'],
                               outputfile=outfile)
     print output
     assert output == ""
@@ -137,6 +138,12 @@ def processLatex(docname, filelist):
     shutil.copy('templates/main.tex',
                 os.path.join(docname,
                              'tex'))
+    shutil.copy('templates/documentProperties.tex',
+                os.path.join(docname,
+                             'tex'))
+    shutil.copy('templates/logo.jpg',
+                os.path.join(docname,
+                             'tex'))
 
     # write the include instructions for the chapters:
     with open(os.path.join(docname,
@@ -150,6 +157,13 @@ def processLatex(docname, filelist):
     # run latx
     print os.path.join(docname, 'tex')
     try:
+        subprocess.check_output(
+            ['pdflatex',
+             '-interaction=nonstopmode',
+             'main.tex'],
+            stderr=subprocess.STDOUT,
+            cwd=os.path.join(docname, 'tex'),
+        )
         subprocess.check_output(
             ['pdflatex',
              '-interaction=nonstopmode',
@@ -260,7 +274,7 @@ def main():
               'r') as f:
         for line in linesFromBulletlist(f.readlines()):
             e = processDocument(line)
-            # uploadDocument(line, e)
+            uploadDocument(line, e)
 
 if __name__ == '__main__':
     main()
