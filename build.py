@@ -26,7 +26,15 @@ def linesFromBulletlist(t):
     one item per line. 
     Return a list of the items, without the bullet syntax.
     """
-    r = [re.sub(' *\* *', '', x, count=1) for x in t]
+    r = [re.sub(' *\* *', '', x, count=1)
+         for x in t
+         if re.match(' *\* *', x)]
+
+    match = [re.search('\[\[ *(.*?) *\]\]', x) for x in r]
+
+    r = [ (m.group(1) if m else x.strip())
+          for (x, m)
+          in zip(r, match)]
     print r
     return r
     
