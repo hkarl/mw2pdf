@@ -49,6 +49,8 @@ def fetch_wiki_page(site, page, out=None):
     if isinstance(page, basestring) or isinstance(page, str):
         # if we get a pagename: fetch the page object
         page = site.Pages[page]
+    if not page.exists:
+        raise Exception("Page not found: %s" % page.name)
     out = "out" if out is None else out
     ensure_dir(out)
 
