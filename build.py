@@ -13,6 +13,11 @@ import pypandoc
 import mwclient
 from pprint import pprint as pp
 
+# debugging flags:
+dbgDownload = False
+dbgLatex = False
+dbgUpload = False
+
 
 def ensure_dir(path):
     try:
@@ -39,7 +44,7 @@ def linesFromBulletlist(t):
     return r
     
 def download(target, output, category=None):
-    return
+    if dbgDownload:
     wikiFetcher.download(host=config.WIKIROOT,
                          target=target,
                          user=config.USER,
@@ -157,6 +162,7 @@ def processLatex(docname, filelist):
     # run latx
     print os.path.join(docname, 'tex')
     try:
+        if dbgLatex:
         subprocess.check_output(
             ['pdflatex',
              '-interaction=nonstopmode',
@@ -274,6 +280,8 @@ def main():
               'r') as f:
         for line in linesFromBulletlist(f.readlines()):
             e = processDocument(line)
+
+            if dbgUpload:
             uploadDocument(line, e)
 
 if __name__ == '__main__':
