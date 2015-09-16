@@ -14,9 +14,9 @@ import mwclient
 from pprint import pprint as pp
 
 # debugging flags:
-dbgDownload = False
-dbgLatex = False
-dbgUpload = False
+dbgDownload = True
+dbgLatex = True
+dbgUpload = True
 
 
 def ensure_dir(path):
