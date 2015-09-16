@@ -23,8 +23,9 @@ def linkhandler(key, value, frmt, meta):
             if kind == "wikilink":
                 if "#" in link:
                     link = link.split('#')[1]
-                    
-                link = '-'.join([x.lower() for x in link.split(' ')])
+
+                sys.stderr.write("link: {}\n---\n\n".format(link))
+                link = '-'.join([x.lower() for x in link.split('_')])
                 return RawInline('latex', "\\ref{{{}}}".format(link))
 
 
