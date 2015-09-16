@@ -117,6 +117,7 @@ def processPandoc(doc, directory):
                               format='mediawiki',
                               to='latex',
                               filters=filters,
+                              extra_args=['--chapters'],
                               outputfile=outfile)
     print output
     assert output == ""
@@ -135,6 +136,12 @@ def processFile(doc, directory):
 def processLatex(docname, filelist):
     # put the latex main document into the directory
     shutil.copy('templates/main.tex',
+                os.path.join(docname,
+                             'tex'))
+    shutil.copy('templates/documentProperties.tex',
+                os.path.join(docname,
+                             'tex'))
+    shutil.copy('templates/logo.jpg',
                 os.path.join(docname,
                              'tex'))
 

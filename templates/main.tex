@@ -1,8 +1,113 @@
-\documentclass{article}
+\documentclass[a4paper,11pt,twoside,headsepline,%
+numbers=noenddot,%
+bibliography=totocnumbered,%
+areasetadvanced]{scrreprt}
+
+
+
+\areaset[2,0cm]{16.5cm}{25cm}
+\setlength\headheight{42pt}
+\setlength\footheight{27.2pt}
+\setlength\footskip{28pt}
+
+\usepackage[headtopline=.5pt,headsepline=.5pt,footsepline=.5pt,%footbotline=.5pt,%
+  automark]{scrlayer-scrpage}
+\usepackage{scrtime}
+\usepackage{scrhack}
+
+% Important packages
+\usepackage{ifthen}
+\usepackage{paralist}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Graphics handling 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \usepackage{graphicx}
-\graphicspath{{../md/}{../uml/}}
+\graphicspath{{../md/}{../uml/}{./}}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+
+
+
+
 \usepackage{hyperref}
 \usepackage{url}
+
+
+\usepackage[printonlyused]{acronym}
+
+
+\usepackage{booktabs}
+\usepackage{lastpage}
+\usepackage{tabularx}
+
+\usepackage{enumitem}
+\usepackage{paralist}
+\usepackage{lipsum}
+
+\usepackage{tikz}
+\usetikzlibrary{trees}
+
+ \usepackage{longtable}
+
+
+\input{documentProperties}
+
+
+
+%---TODOS---
+\usepackage[colorinlistoftodos, textwidth=2.5cm]{todonotes}
+
+%%----- figure scaling 
+
+\newcommand{\scalefactor}{0.6}
+\newcommand{\subfigspacing}{\quad}
+\newcommand{\subfigpadding}{\hspace{5mm}}
+
+%%----- set up page layout 
+
+\newcommand{\headerFooterFormat}{\footnotesize}
+\newcommand{\frontpageSectionSep}{\vspace{7mm}}
+\newcommand{\frontpageTitleSep}{\vspace{1mm}}
+\newcommand{\formLabel}[1]{{\sffamily \footnotesize #1}}
+\newcommand{\formSection}[1]{{\bfseries \sffamily #1}}
+
+\pagestyle{scrheadings}
+\renewcommand{\chapterpagestyle}{scrheadings}
+
+\setkomafont{pagehead}{\normalfont\normalcolor\footnotesize}
+\setkomafont{pagefoot}{\normalfont\normalcolor\footnotesize}
+
+\newsavebox{\logoBox}
+\sbox\logoBox{\includegraphics*[width=5cm]{logo}}
+\newcommand*{\logo}{\usebox\logoBox\vspace{-2pt}}
+
+\newcommand*{\headTable}{{\begin{tabular}{llll}
+	Document:	& \multicolumn{3}{l}{\projectNumber/\docNumber} \\
+	Date:		& \docDate	& Security:	& \docSecurity \\
+	Status:		& \docStatus	& Version:	& \docVersion
+  \end{tabular} 
+}}
+
+
+\lehead[\logo]{\logo}
+\lohead[\logo]{\logo}
+
+\rehead[\headTable]{\headTable}
+\rohead[\headTable]{\headTable}
+
+% footers
+\refoot[\\ SONATA]{\\ SONATA}
+\lofoot[\\ SONATA]{\\ SONATA}
+\rofoot[\\ \thepage]{\\ \thepage}
+\lefoot[\\ \thepage]{\\ \thepage}
+\cfoot[{\docSecurity}]{{\docSecurity}}
+
+
+
 
 \begin{document}
 \input{includer}
