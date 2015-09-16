@@ -39,7 +39,7 @@ def linesFromBulletlist(t):
     return r
     
 def download(target, output, category=None):
-    # return
+    return
     wikiFetcher.download(host=config.WIKIROOT,
                          target=target,
                          user=config.USER,
@@ -274,7 +274,7 @@ def main():
               'r') as f:
         for line in linesFromBulletlist(f.readlines()):
             e = processDocument(line)
-            # uploadDocument(line, e)
+            uploadDocument(line, e)
 
 if __name__ == '__main__':
     main()
