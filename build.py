@@ -45,12 +45,12 @@ def linesFromBulletlist(t):
     
 def download(target, output, category=None):
     if dbgDownload:
-    wikiFetcher.download(host=config.WIKIROOT,
-                         target=target,
-                         user=config.USER,
-                         password=config.PASSWORD,
-                         output=output,
-                         category=category)
+        wikiFetcher.download(host=config.WIKIROOT,
+                             target=target,
+                             user=config.USER,
+                             password=config.PASSWORD,
+                             output=output,
+                             category=category)
 
 
 def processUML(doc, directory):
@@ -138,7 +138,7 @@ def processFile(doc, directory):
     processPandoc(doc, directory)
 
 
-def processLatex(docname, filelist):
+def processLatex(docname, filelist, properties, rawlatex):
     # put the latex main document into the directory
     shutil.copy('templates/main.tex',
                 os.path.join(docname,
@@ -150,33 +150,59 @@ def processLatex(docname, filelist):
                 os.path.join(docname,
                              'tex'))
 
+    # prepare the additional properties:
+    if properties:
+        print "writing properties"
+        with open(os.path.join(docname,
+                           'tex',
+                           'moreProperties.tex'),
+              'w') as propFile:
+            for k,v in properties:
+                propFile.write(
+                    '\\renewcommand{{{}}}{{{}}}\n'.format(
+                        k, v
+                        ))
+
+    # and any raw LaTeX we are given:
+    if rawlatex:
+        print rawlatex
+        with open(os.path.join(docname,
+                           'tex',
+                           'rawtex.tex'),
+              'w') as rawtex:
+            rawtex.write('\n'.join(rawlatex))
+
     # write the include instructions for the chapters:
     with open(os.path.join(docname,
                            'tex',
                            'includer.tex'),
               'w') as includer:
-        
+
+        if properties:
+            includer.write('\\include{moreProperties}\n')
+        if rawtex:
+            includer.write('\\include{rawte}\n')
         for f in filelist:
-            includer.write('\\include{' + f + '}')
+            includer.write('\\include{' + f + '}\n')
 
     # run latx
     print os.path.join(docname, 'tex')
     try:
         if dbgLatex:
-        subprocess.check_output(
-            ['pdflatex',
-             '-interaction=nonstopmode',
-             'main.tex'],
-            stderr=subprocess.STDOUT,
-            cwd=os.path.join(docname, 'tex'),
-        )
-        subprocess.check_output(
-            ['pdflatex',
-             '-interaction=nonstopmode',
-             'main.tex'],
-            stderr=subprocess.STDOUT,
-            cwd=os.path.join(docname, 'tex'),
-        )
+            subprocess.check_output(
+                ['pdflatex',
+                 '-interaction=nonstopmode',
+                 'main.tex'],
+                stderr=subprocess.STDOUT,
+                cwd=os.path.join(docname, 'tex'),
+            )
+            subprocess.check_output(
+                ['pdflatex',
+                 '-interaction=nonstopmode',
+                 'main.tex'],
+                stderr=subprocess.STDOUT,
+                cwd=os.path.join(docname, 'tex'),
+            )
         e = None
     except subprocess.CalledProcessError as e:
         print e, e.output
@@ -186,6 +212,21 @@ def processLatex(docname, filelist):
 
     return e
 
+def getSection(text, section):
+    """Assume text is a mediawiki formatted text.
+    Assume it has L1 headings. 
+    Obtain the L1 heading with section as title
+    """
+    
+    print "getSection: ", text, section 
+    m = re.search('= *' + section + ' *=([^=]*)',
+                  text, re.S)
+
+    if m:
+        blocktext = m.group(1).strip()
+        return blocktext.split('\n')
+    else:
+        return None
 
 def processDocument(docname):
     print docname
@@ -202,19 +243,41 @@ def processDocument(docname):
     # now grab the files for this document:
     with open(os.path.join(docname,
                            docname + '.md'),
-              'r') as doctoc:
-        for doc in linesFromBulletlist(doctoc.readlines()):
+              'r') as doc:
+
+        doclines = doc.read()
+        
+    doctoc = getSection(doclines, 'TOC')
+    docprop  = getSection(doclines, 'Properties')
+    doclatex  = getSection(doclines, 'Latex')
+
+    # process the toc: which files to download, include?
+    if doctoc:
+        for doc in linesFromBulletlist(doctoc):
             doc = doc.strip()
-            print "processing: >>", doc, "<<"
-            mddir = os.path.join(docname, 'md')
-            download(target=doc,
-                     output=mddir)
+            if doc: 
+                print "processing: >>", doc, "<<"
+                mddir = os.path.join(docname, 'md')
+                download(target=doc,
+                         output=mddir)
 
-            # process each document separately
-            processFile(doc, mddir)
-            filelist.append(doc)
+                # process each document separately
+                processFile(doc, mddir)
+                filelist.append(doc)
 
-    e = processLatex(docname, filelist)
+    # process any additional properties:
+    if docprop:
+        tmp = linesFromBulletlist(docprop)
+        tmp = [x.split(':') for x in tmp]
+        tmp = filter(lambda x: len(x) == 2, tmp)
+
+        properties = [(k.strip(), v.strip())
+                      for (k,v) in tmp ]
+        print properties
+    else:
+        properties = None
+    
+    e = processLatex(docname, filelist, properties, doclatex)
 
     return e
 
@@ -282,7 +345,7 @@ def main():
             e = processDocument(line)
 
             if dbgUpload:
-            uploadDocument(line, e)
+                uploadDocument(line, e)
 
 if __name__ == '__main__':
     main()
