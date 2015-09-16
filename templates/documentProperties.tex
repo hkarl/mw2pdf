@@ -6,13 +6,6 @@
 \newboolean{final}
 \setboolean{final}{false}	% change this for release
 
-\newboolean{deliverable}
-\setboolean{deliverable}{true}	% change this for milestone document
-
-\ifthenelse{\boolean{deliverable}}{
-  \newcommand*{\dt}{D}}{
-  \newcommand*{\dt}{M}
-}
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % use fixme and changes packages
@@ -32,7 +25,7 @@
 % Start changing here again
 %
 \newcommand{\projectNumber}{SONATA}
-\newcommand{\docNumber}{\dt~2.4}
+\newcommand{\docNumber}{DXY}
 \newcommand{\docTitle}{TITLE TO BE DEFINED}
 \newcommand{\docSecurity}{Confidential}
 \newcommand{\docTargetDissLevel}{CO}
@@ -49,11 +42,11 @@
 \newcommand{\docAuthors}{XXX
 }
 
-% add revision history here - probably don't want to display this for final version 
-\newcommand{\docRevisionHistory}{
-Revision & Date & Issued by & Description \\  
-\hline
-}
+% % add revision history here - probably don't want to display this for final version 
+% \newcommand{\docRevisionHistory}{
+% Revision & Date & Issued by & Description \\  
+% \hline
+% }
 
 \newcommand{\docKeywords}{XXX}
 

@@ -108,7 +108,145 @@ areasetadvanced]{scrreprt}
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \begin{document}
+
+\pagenumbering{roman}
+
+
+%----------------------------------------------------------------
+
+% \frontmatter
+% \vspace*{5mm}
+\noindent \formSection{Document Properties} \frontpageTitleSep \\
+\begin{tabularx}{\textwidth}[l]{p{50mm}X}
+	\hline
+	\formLabel{Document Number:}		& \docNumber \\ \hline
+	\formLabel{Document Title:}		& {\bfseries \sffamily \vspace*{1mm} \docTitle \vspace*{3mm}} \\ \hline
+	\formLabel{Document Responsible:}	& \docResponsible \\ \hline
+	\formLabel{Document Editor:}	& \docEditors \\ \hline
+	\formLabel{Authors:}			& \docAuthors \\ \hline
+	\formLabel{Target Dissemination Level:}	& \docTargetDissLevel \\ \hline
+	\formLabel{Status of the Document:}	& \docStatus \\ \hline
+	\formLabel{Version:}			& \docVersion \\
+	\hline
+\end{tabularx}
+
+\frontpageSectionSep
+
+\noindent \formSection{Production Properties:} \frontpageTitleSep \\
+\begin{tabularx}{\textwidth}[l]{p{50mm}X}
+ 	\hline
+ 	\formLabel{Reviewers:} & \docReviewed \\
+ 	\hline
+\end{tabularx}
+ 
+\frontpageSectionSep
+
+\noindent \formSection{Document History:}
+\frontpageTitleSep \\ 
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+\docRevisionHistory
+\hline 
+\end{tabularx} 
+
+\frontpageSectionSep
+
+\noindent \formSection{Disclaimer:} 
+\frontpageTitleSep \\
+\begin{tabularx}{\textwidth}{|X|}
+\hline
+\footnotesize \itshape This document has been produced in the context
+of the SONATA  Project. The research leading to these results has
+received funding from the European Community's 5G-PPP  under grant agreement n$^\circ$ XXX.
+
+All information in this document is provided ``as is'' and no guarantee or warranty is given that the information is fit for any particular purpose. The user thereof uses the information at its sole risk and liability.
+
+For the avoidance of all doubts, the European Commission has no liability in respect of this document, which is merely representing the authors' view. \\ 
+\hline
+\end{tabularx}
+
+\clearpage
+\frontpageSectionSep
+
+\noindent \formSection{Abstract:} 
+\frontpageTitleSep \\
+\begin{tabularx}{\textwidth}{|X|}
+\hline
+%\small
+% \input{abstract}
+\\
+\hline
+\end{tabularx}
+
+\frontpageSectionSep
+
+\noindent \formSection{Keywords:} 
+\frontpageTitleSep \\
+\begin{tabularx}{\textwidth}{|X|} 
+\hline
+\small 
+\docKeywords 
+\\
+\hline
+\end{tabularx}
+
+%----------------------------------------------------------------
+
+
+\tableofcontents
+
+% Comment/uncomment if figures exist (almost always)
+
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+\clearpage
+
+
+% Comment/uncomment if tables exist
+
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+\clearpage
+
+% Command/uncomment if listings or algorithms exist
+
+% \addcontentsline{toc}{chapter}{List of Listings and Algorithms}
+% \lstlistoflistings
+% \clearpage
+
+
+% \addcontentsline{toc}{chapter}{List of Acronyms}
+% \input{acronyms}
+% \clearpage
+
+\ifthenelse{\boolean{final}}{}{
+  \addcontentsline{toc}{chapter}{List of Corrections}
+  \listoffixmes
+  \clearpage}
+
+\pagenumbering{arabic}
+
+%%%%%%%%%%%%%%%
+% Here the actual text begins
+%
+% Add input commands here
+%
+%%%%%%%%%%%%%%%
+
+
 \input{includer}
+
+
+
+\appendix
+
+%%
+%% Include your appendices here
+%%
+
+
 \end{document}
