@@ -157,6 +157,13 @@ def processLatex(docname, filelist):
             stderr=subprocess.STDOUT,
             cwd=os.path.join(docname, 'tex'),
         )
+        subprocess.check_output(
+            ['pdflatex',
+             '-interaction=nonstopmode',
+             'main.tex'],
+            stderr=subprocess.STDOUT,
+            cwd=os.path.join(docname, 'tex'),
+        )
         e = None
     except subprocess.CalledProcessError as e:
         print e, e.output
