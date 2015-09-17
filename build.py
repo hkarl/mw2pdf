@@ -248,11 +248,16 @@ def processDocument(docname, fingerprint):
     download(target=docname,
              output=docname)
 
+    # make sure that at least md subdirextory is empty
+    # later on, might remove all other stuff as well
+    shutil.rmtree(os.path.join(docname, 'md'))
+
     ensure_dir(os.path.join(docname, 'figures'))
     ensure_dir(os.path.join(docname, 'uml'))
     ensure_dir(os.path.join(docname, 'md'))
     ensure_dir(os.path.join(docname, 'tex'))
 
+    
     filelist = []
     
     # now grab the files for this document:
