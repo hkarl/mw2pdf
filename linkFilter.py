@@ -1,5 +1,7 @@
-#!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
+#!/usr/bin/python
 
+#original (does not work on Linux or default OSX):
+#!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
 
 """
 Pandoc filter to convert links from mediawiki in a more
