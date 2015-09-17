@@ -159,8 +159,9 @@ def processLatex(docname, filelist, properties, rawlatex):
               'w') as propFile:
             for k,v in properties:
                 propFile.write(
-                    '\\renewcommand{{{}}}{{{}}}\n'.format(
-                        k, v
+                    '\\providecommand{{{}}}{{{}}}\n\\renewcommand{{{}}}{{{}}}\n'
+                    .format(
+                        k, v, k, v
                         ))
 
     # and any raw LaTeX we are given:
