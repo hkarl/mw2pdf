@@ -248,9 +248,11 @@ def processDocument(docname, fingerprint):
     download(target=docname,
              output=docname)
 
-    # make sure that at least md subdirextory is empty
+    # make sure that at least md subdirectory is empty
     # later on, might remove all other stuff as well
-    shutil.rmtree(os.path.join(docname, 'md'))
+    # (only clear, when folder already exists)
+    if os.path.exists(os.path.join(docname, 'md')):
+        shutil.rmtree(os.path.join(docname, 'md'))
 
     ensure_dir(os.path.join(docname, 'figures'))
     ensure_dir(os.path.join(docname, 'uml'))
