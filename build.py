@@ -151,15 +151,15 @@ def processLatex(docname, filelist, properties, rawlatex):
                              'tex'))
 
     # prepare the additional properties:
-    if properties:
-        print "writing properties"
-        with open(os.path.join(docname,
-                           'tex',
-                           'moreProperties.tex'),
-              'w') as propFile:
+    print "writing properties"
+    with open(os.path.join(docname,
+                       'tex',
+                       'moreProperties.tex'),
+          'w') as propFile:
+        if properties:
             for k,v in properties:
                 propFile.write(
-                    '\\providecommand{{{}}}{{{}}}\n\\renewcommand{{{}}}{{{}}}\n'
+                    '\\providecommand{{\\{}}}{{{}}}\n\\renewcommand{{\\{}}}{{{}}}\n'
                     .format(
                         k, v, k, v
                         ))
@@ -179,8 +179,6 @@ def processLatex(docname, filelist, properties, rawlatex):
                            'includer.tex'),
               'w') as includer:
 
-        if properties:
-            includer.write('\\include{moreProperties}\n')
         if rawlatex:
             includer.write('\\include{rawtex}\n')
         for f in filelist:
