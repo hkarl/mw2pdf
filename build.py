@@ -181,8 +181,8 @@ def processLatex(docname, filelist, properties, rawlatex):
 
         if properties:
             includer.write('\\include{moreProperties}\n')
-        if rawtex:
-            includer.write('\\include{rawte}\n')
+        if rawlatex:
+            includer.write('\\include{rawtex}\n')
         for f in filelist:
             includer.write('\\include{' + f + '}\n')
 
