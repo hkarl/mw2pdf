@@ -7,16 +7,20 @@ import config
 # imports:
 
 import os, re, string, shutil
-import wikiFetcher
+import pickle
 import subprocess
 import pypandoc
 import mwclient
 from pprint import pprint as pp
+from collections import defaultdict
+
+import wikiFetcher
+import path_checksum
 
 # debugging flags:
 dbgDownload = True
 dbgLatex = True
-dbgUpload = True
+
 
 
 def ensure_dir(path):
@@ -141,7 +145,7 @@ def processFile(doc, directory):
     processPandoc(doc, directory)
 
 
-def processLatex(docname, filelist, properties, rawlatex):
+def prepareDirectory(docname, filelist, properties, rawlatex):
     # put the latex main document into the directory
     shutil.copy('templates/main.tex',
                 os.path.join(docname,
@@ -187,10 +191,19 @@ def processLatex(docname, filelist, properties, rawlatex):
         for f in filelist:
             includer.write('\\include{' + f + '}\n')
 
+            
+def processLatex(docname):
     # run latx
     print os.path.join(docname, 'tex')
     try:
         if dbgLatex:
+            subprocess.check_output(
+                ['pdflatex',
+                 '-interaction=nonstopmode',
+                 'main.tex'],
+                stderr=subprocess.STDOUT,
+                cwd=os.path.join(docname, 'tex'),
+            )
             subprocess.check_output(
                 ['pdflatex',
                  '-interaction=nonstopmode',
@@ -230,7 +243,7 @@ def getSection(text, section):
     else:
         return None
 
-def processDocument(docname):
+def processDocument(docname, fingerprint):
     print docname
     download(target=docname,
              output=docname)
@@ -278,10 +291,22 @@ def processDocument(docname):
         print properties
     else:
         properties = None
-    
-    e = processLatex(docname, filelist, properties, doclatex)
 
-    return e
+    # prepare directory
+    prepareDirectory(docname, filelist, properties, doclatex)
+    
+    # check against fingerpint 
+    newfingerprint = path_checksum.path_checksum(
+        [os.path.join(docname, 'md')])
+
+    print "fingerprints: ", fingerprint, newfingerprint
+    if not fingerprint == newfingerprint:
+        e = processLatex(docname)
+    else:
+        print "nothing has changed in ", docname
+        e = None
+
+    return e, newfingerprint 
 
     # report the results back: stdout, pdf file
 
@@ -334,6 +359,14 @@ def uploadDocument(doc, excp):
     
 
 def main():
+
+    # try to get the fingerprints:
+    try:
+        with open('fingerprints', 'r') as fp:
+            fingerprints = pickle.load(fp)
+    except:
+        fingerprints = defaultdict(str)
+    
     # start the download
     print "downloading documentlist"
     download(target=config.DOCUMENTLIST,
@@ -344,10 +377,15 @@ def main():
                            config.DOCUMENTLIST + '.md'),
               'r') as f:
         for line in linesFromBulletlist(f.readlines()):
-            e = processDocument(line)
+            e, newfp = processDocument(line,
+                                fingerprints[line])
 
-            if dbgUpload:
+            if not fingerprints[line] == newfp:
                 uploadDocument(line, e)
+                fingerprints[line] = newfp
 
+    with open('fingerprints', 'w') as fp:
+        pickle.dump(fingerprints, fp)
+                    
 if __name__ == '__main__':
     main()
