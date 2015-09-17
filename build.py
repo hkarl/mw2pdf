@@ -45,12 +45,15 @@ def linesFromBulletlist(t):
     
 def download(target, output, category=None):
     if dbgDownload:
-        wikiFetcher.download(host=config.WIKIROOT,
-                             target=target,
-                             user=config.USER,
-                             password=config.PASSWORD,
-                             output=output,
-                             category=category)
+        try: 
+            wikiFetcher.download(host=config.WIKIROOT,
+                                 target=target,
+                                 user=config.USER,
+                                 password=config.PASSWORD,
+                                 output=output,
+                                 category=category)
+        except:
+            pass
 
 
 def processUML(doc, directory):
