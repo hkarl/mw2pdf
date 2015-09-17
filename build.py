@@ -94,12 +94,12 @@ def processUML(doc, directory):
         subprocess.call(['java',
                          '-jar',
                          '../../plantuml.jar',
-                         '-tpng',
+                         '-teps',
                          umlfile+'.uml'],
                         cwd=umldir)
 
         data = string.replace(data, m.group(0),
-                              "[[File:" + umlfile + ".png|UML diagram]]", 1)
+                              "[[File:" + umlfile + ".eps|UML diagram]]", 1)
         i += 1
         m = re.search("<uml>(.*?)</uml>", data, re.S)
 
@@ -199,6 +199,7 @@ def processLatex(docname):
         if dbgLatex:
             subprocess.check_output(
                 ['pdflatex',
+                 '-shell-escape',
                  '-interaction=nonstopmode',
                  'main.tex'],
                 stderr=subprocess.STDOUT,
@@ -206,6 +207,7 @@ def processLatex(docname):
             )
             subprocess.check_output(
                 ['pdflatex',
+                 '-shell-escape',
                  '-interaction=nonstopmode',
                  'main.tex'],
                 stderr=subprocess.STDOUT,
@@ -213,6 +215,7 @@ def processLatex(docname):
             )
             subprocess.check_output(
                 ['pdflatex',
+                 '-shell-escape',
                  '-interaction=nonstopmode',
                  'main.tex'],
                 stderr=subprocess.STDOUT,
