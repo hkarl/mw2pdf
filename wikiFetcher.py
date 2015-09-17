@@ -15,6 +15,7 @@
 
 import argparse
 import os
+import re
 import subprocess
 import mwclient  # pip install mwclient
 
@@ -56,7 +57,8 @@ def fetch_wiki_page(site, page, out=None):
 
     print "Fetching page: %s" % page.name
     # fetch page content as markdown
-    with open("%s%s.md" % (out, page.name), 'w') as f:
+    pagefile = re.sub(' ', '_', page.name)
+    with open("%s%s.md" % (out, pagefile), 'w') as f:
         f.write(page.text().encode('utf8'))
     print "Stored page content in %s.md" % page.name
 
