@@ -51,5 +51,5 @@ per document
 
 * plantuml jar file is included here, but look for a more up-to-date
 version
-* python modules needed: mwclient and pypandoc
+* python modules needed: mwclient, pypandoc, pandocfilters
 * installation: python, java, pandoc
