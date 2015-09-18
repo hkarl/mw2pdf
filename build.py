@@ -6,7 +6,10 @@ import config
 
 # imports:
 
-import os, re, string, shutil
+import os
+import re
+import string
+import shutil
 import pickle
 import subprocess
 import pypandoc
@@ -22,7 +25,6 @@ dbgDownload = True
 dbgLatex = True
 
 
-
 def ensure_dir(path):
     try:
         os.makedirs(path)
@@ -30,9 +32,10 @@ def ensure_dir(path):
         if not os.path.isdir(path):
             raise
 
+
 def linesFromBulletlist(t):
     """Assume t is a mediawiki bullet list produced by readlines,
-    one item per line. 
+    one item per line.
     Return a list of the items, without the bullet syntax.
     """
     r = [re.sub(' *\* *', '', x, count=1)
@@ -41,15 +44,16 @@ def linesFromBulletlist(t):
 
     match = [re.search('\[\[ *(.*?) *\]\]', x) for x in r]
 
-    r = [ (m.group(1) if m else x.strip())
-          for (x, m)
-          in zip(r, match)]
+    r = [(m.group(1) if m else x.strip())
+         for (x, m)
+         in zip(r, match)]
     print r
     return r
-    
+
+
 def download(target, output, category=None):
     if dbgDownload:
-        try: 
+        try:
             wikiFetcher.download(host=config.WIKIROOT,
                                  target=target,
                                  user=config.USER,
@@ -120,7 +124,7 @@ def processPandoc(doc, directory):
             'tex'),
         doc + '.tex')
 
-    filters=[os.path.join(
+    filters = [os.path.join(
         os.getcwd(),
         'linkFilter.py'),
          ]
@@ -160,11 +164,11 @@ def prepareDirectory(docname, filelist, properties, rawlatex):
     # prepare the additional properties:
     print "writing properties"
     with open(os.path.join(docname,
-                       'tex',
-                       'moreProperties.tex'),
-          'w') as propFile:
+                           'tex',
+                           'moreProperties.tex'),
+              'w') as propFile:
         if properties:
-            for k,v in properties:
+            for k, v in properties:
                 propFile.write(
                     '\\providecommand{{\\{}}}{{{}}}\n\\renewcommand{{\\{}}}{{{}}}\n'
                     .format(
@@ -175,9 +179,9 @@ def prepareDirectory(docname, filelist, properties, rawlatex):
     if rawlatex:
         print rawlatex
         with open(os.path.join(docname,
-                           'tex',
-                           'rawtex.tex'),
-              'w') as rawtex:
+                               'tex',
+                               'rawtex.tex'),
+                  'w') as rawtex:
             rawtex.write('\n'.join(rawlatex))
 
     # write the include instructions for the chapters:
@@ -191,7 +195,7 @@ def prepareDirectory(docname, filelist, properties, rawlatex):
         for f in filelist:
             includer.write('\\include{' + f + '}\n')
 
-            
+
 def processLatex(docname):
     # run latx
     print os.path.join(docname, 'tex')
@@ -227,13 +231,14 @@ def processLatex(docname):
 
     return e
 
+
 def getSection(text, section):
     """Assume text is a mediawiki formatted text.
-    Assume it has L1 headings. 
+    Assume it has L1 headings.
     Obtain the L1 heading with section as title
     """
-    
-    print "getSection: ", text, section 
+
+    print "getSection: ", text, section
     m = re.search('= *' + section + ' *=([^=]*)',
                   text, re.S)
 
@@ -242,6 +247,7 @@ def getSection(text, section):
         return blocktext.split('\n')
     else:
         return None
+
 
 def processDocument(docname, fingerprint):
     print docname
@@ -259,25 +265,24 @@ def processDocument(docname, fingerprint):
     ensure_dir(os.path.join(docname, 'md'))
     ensure_dir(os.path.join(docname, 'tex'))
 
-    
     filelist = []
-    
+
     # now grab the files for this document:
     with open(os.path.join(docname,
                            docname + '.md'),
               'r') as doc:
 
         doclines = doc.read()
-        
+
     doctoc = getSection(doclines, 'TOC')
-    docprop  = getSection(doclines, 'Properties')
-    doclatex  = getSection(doclines, 'Latex')
+    docprop = getSection(doclines, 'Properties')
+    doclatex = getSection(doclines, 'Latex')
 
     # process the toc: which files to download, include?
     if doctoc:
         for doc in linesFromBulletlist(doctoc):
             doc = doc.strip()
-            if doc: 
+            if doc:
                 print "processing: >>", doc, "<<"
                 mddir = os.path.join(docname, 'md')
                 download(target=doc,
@@ -294,15 +299,15 @@ def processDocument(docname, fingerprint):
         tmp = filter(lambda x: len(x) == 2, tmp)
 
         properties = [(k.strip(), v.strip())
-                      for (k,v) in tmp ]
+                      for (k, v) in tmp]
         print properties
     else:
         properties = None
 
     # prepare directory
     prepareDirectory(docname, filelist, properties, doclatex)
-    
-    # check against fingerpint 
+
+    # check against fingerpint
     newfingerprint = path_checksum.path_checksum(
         [os.path.join(docname, 'md')])
 
@@ -313,7 +318,7 @@ def processDocument(docname, fingerprint):
         print "nothing has changed in ", docname
         e = None
 
-    return e, newfingerprint 
+    return e, newfingerprint
 
     # report the results back: stdout, pdf file
 
@@ -325,9 +330,9 @@ def uploadDocument(doc, excp):
     wikisite = mwclient.Site(config.WIKIROOT, path='/')
     wikisite.login(config.USER, config.PASSWORD)
 
-    # deal with any possible exceptions 
+    # deal with any possible exceptions
 
-    # deal with the PDF file: 
+    # deal with the PDF file:
     texdir = os.path.join(doc, 'tex')
     pdffile = os.path.join(texdir,
                            'main.pdf')
@@ -343,8 +348,8 @@ def uploadDocument(doc, excp):
     else:
         print "no pdf to upload"
 
-    #prepare the build report page
-    page = wikisite.Pages[ doc  + 'BuildReport']
+    # prepare the build report page
+    page = wikisite.Pages[doc + 'BuildReport']
     text = page.text()
     text = "= Build report for {} =\n".format(doc)
 
@@ -361,9 +366,9 @@ def uploadDocument(doc, excp):
     text += "\n== PDF file ==\n"
     text += "\n[[File:" + doc + ".pdf]]\n"
     text += "\n[[Category:BuildReport]]\n"
-    
+
     page.save(text)
-    
+
 
 def main():
 
@@ -373,7 +378,7 @@ def main():
             fingerprints = pickle.load(fp)
     except:
         fingerprints = defaultdict(str)
-    
+
     # start the download
     print "downloading documentlist"
     download(target=config.DOCUMENTLIST,
@@ -385,7 +390,7 @@ def main():
               'r') as f:
         for line in linesFromBulletlist(f.readlines()):
             e, newfp = processDocument(line,
-                                fingerprints[line])
+                                       fingerprints[line])
 
             if not fingerprints[line] == newfp:
                 uploadDocument(line, e)
@@ -393,6 +398,6 @@ def main():
 
     with open('fingerprints', 'w') as fp:
         pickle.dump(fingerprints, fp)
-                    
+
 if __name__ == '__main__':
     main()
