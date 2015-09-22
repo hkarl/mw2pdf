@@ -7,6 +7,7 @@ import config
 # imports:
 
 import os
+import glob
 import re
 import string
 import shutil
@@ -135,7 +136,7 @@ def processPandoc(doc, directory):
                               filters=filters,
                               extra_args=['--chapters'],
                               outputfile=outfile)
-    print output
+    print "padnoc output", output
     assert output == ""
 
 
@@ -196,9 +197,76 @@ def prepareDirectory(docname, filelist, properties, rawlatex):
             includer.write('\\include{' + f + '}\n')
 
 
+def preProcessLatex(docdir):
+    """Because of limitations in pondoc's mediawiki parser
+    and Mediawiki's markup syntax, we need a few tricks 
+    to get the right LaTeX for figure and table crossreferencing 
+    as well as table column styles 
+    """
+
+    def replace_tablehead(m):
+        print m
+        print "======"
+        print m.group(1)
+        print "-----"
+        print m.group(2)
+        print "-----"
+        print m.group(3)
+        print "-----"
+        print m.group(4)
+        print "======"
+
+        tmp = m.group(4)
+        tmp = re.sub(r'\\{', '{', tmp)
+        tmp = re.sub(r'\\}', '}', tmp)
+        
+        res = r"\begin{{longtable}}[c]{{{}}} \caption{{{}}}\label{{{}}}\tabularnewline".format(
+            tmp,
+            m.group(2),
+            m.group(3),
+            )
+            
+        print res
+        return res
+
+    print "preprocessing in ", docdir
+
+    for f in glob.glob(os.path.join(docdir, '*.tex')):
+        if f.endswith('main.tex'):
+            continue
+        print "copying ", f
+        shutil.copy(f, f+'.bak')
+        with open(f, 'r') as fhandle:
+            doc = fhandle.read()
+
+        # first, let's see if there is a table head with a caption, and labal, and position marks
+        doc = re.sub(r'\\begin{longtable}\[c\]{(.*?)}\n\\caption{(.*?)\\#(.*?)\\#(.*)}\\tabularnewline',
+                     # r'\\begin{longtable}[c]{\4}\caption{\2}\label{\3}\tabularnewline',
+                     replace_tablehead,
+                     doc,
+                     flags=re.S)
+        
+        # second, lets create labels from the text after a hashmark of a caption:
+        doc = re.sub(r'\\caption{(.*?)(\\#(.*?))}',
+                     r'\caption{\1}\label{\3}',
+                     doc,
+                     flags=re.S)
+
+        # looks not necessary on account of autoref: 
+        # # third, turn any \url references into proper refs, unless they point to a true http
+        # doc =  re.sub('\url{(?!http://)(.+?)}', '\\ref{\\1}', doc, flags=re.S)
+        
+        
+        with open(f, 'w')  as fhandle:
+            fhandle.write(doc)
+        
+            
 def processLatex(docname):
     # run latx
     print os.path.join(docname, 'tex')
+
+    preProcessLatex(os.path.join(docname, 'tex'))
+    
     try:
         if dbgLatex:
             subprocess.check_output(
