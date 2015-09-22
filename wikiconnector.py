@@ -69,13 +69,19 @@ def fetch_wiki_page(site, page, out=None):
     # fetch all images used in page
     # TODO: Filter? This will download all linked files (e.g. PDFs)
     print "Fetching page's images"
+    download_ps = []
     for img in no_archived_elements(page.images()):
-        subprocess.call(
+        p = subprocess.Popen(
             ["wget", "-xNq",
              "-O%s%s" % (out, img.name.replace("File:", "")),
              img.imageinfo['url']
              ])
-        print "Downloaded: %s" % img.name
+        download_ps.append(p)
+        print "Downloading: %s" % img.name
+    print "Waiting for all downloads to finish..."
+    ecodes = [p.wait() for p in download_ps]
+    if 1 in ecodes:
+        print "*** WARNING: File download failed. ***"
 
 
 def fetch_wiki_category(site, catname, out=None):
