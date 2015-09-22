@@ -385,11 +385,15 @@ def main():
     # start the download
     print "downloading documentlist"
     download(target=config.DOCUMENTLIST,
-             output="Documentlist")
+             output="DocumentList")
 
+    print os.getcwd()
+    fname = os.path.join('DocumentList',
+                         config.DOCUMENTLIST + '.md')
+    print fname
+    print os.path.abspath(fname)
     # iterate over the documents contained in documentlist:
-    with open(os.path.join('DocumentList',
-                           config.DOCUMENTLIST + '.md'),
+    with open(fname,
               'r') as f:
         for line in linesFromBulletlist(f.readlines()):
             e, newfp = processDocument(line,
