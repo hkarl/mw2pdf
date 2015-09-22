@@ -17,17 +17,21 @@ import argparse
 import os
 import re
 import subprocess
+from pprint import pprint as pp
 import mwclient  # pip install mwclient
+
+# global pointer to our active wiki
+SITE = None
 
 
 def setup_connection(host, user=None, password=None):
     """
     Setup mwclient connection to wiki
     """
-    site = mwclient.Site(host, path='/')
+    global SITE
+    SITE = mwclient.Site(host, path='/')
     if user is not None:
-        site.login(user, password)
-    return site
+        SITE.login(user, password)
 
 
 def no_archived_elements(img_list):
@@ -95,17 +99,64 @@ def ensure_dir(directory):
         os.makedirs(directory)
 
 
-def download(host, target,
-             user=None, password=None,
-             output="out/", category=None):
+def download(target,
+             output="out/", category=None, **kwargs):
+    global SITE
+    if SITE is None:
+        raise Exception("Wiki connection was not initialized.")
     if not output[-1] == '/':
         output += '/'
-
-    site = setup_connection(host, user, password)
     if category:
-        fetch_wiki_category(site, target, output)
+        fetch_wiki_category(SITE, target, output)
     else:
-        fetch_wiki_page(site, target, output)
+        fetch_wiki_page(SITE, target, output)
+
+
+def upload_document(doc, excp):
+    """upload both build progress information
+    as well as a potneitally generated PDF """
+    global SITE
+
+    # deal with any possible exceptions
+    if SITE is None:
+        raise Exception("Wiki connection was not initialized.")
+
+    # deal with the PDF file:
+    texdir = os.path.join(doc, 'tex')
+    pdffile = os.path.join(texdir,
+                           'main.pdf')
+
+    if os.path.isfile(pdffile):
+        uploadedName = doc + ".pdf"
+        print "pdf exists, uploding ", pdffile, " as ", uploadedName
+        res = SITE.upload(open(pdffile),
+                          uploadedName,
+                          "Generated file for document " + doc,
+                          ignore=True)
+        pp(res)
+    else:
+        print "no pdf to upload"
+
+    # prepare the build report page
+    page = SITE.Pages[doc + 'BuildReport']
+    text = page.text()
+    text = "= Build report for {} =\n".format(doc)
+
+    if excp:
+        text += "== Return code ==\n"
+        text += str(excp.returncode)
+        text += "\n== Output ==\n"
+        text += "\n<nowiki>\n"
+        text += excp.output
+        text += "\n</nowiki>\n"
+    else:
+        text += "\n== No errors reported! ==\n"
+
+    text += "\n== PDF file ==\n"
+    text += "\n[[File:" + doc + ".pdf]]\n"
+    text += "\n[[Category:BuildReport]]\n"
+
+    page.save(text)
 
 
 def setup_cli_parser():
@@ -130,4 +181,6 @@ def setup_cli_parser():
 
 if __name__ == '__main__':
     parser = setup_cli_parser()
-    download(**vars(parser.parse_args()))
+    args = parser.parse_args()
+    setup_connection(host=args.host, user=args.user, password=args.password)
+    download(**vars(args))
