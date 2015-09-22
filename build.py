@@ -17,7 +17,7 @@ import pypandoc
 from pprint import pprint as pp
 from collections import defaultdict
 
-import wikiFetcher as wiki
+import wikiconnector as wiki
 import path_checksum
 
 # debugging flags:
@@ -393,9 +393,13 @@ def processDocument(docname, fingerprint):
 
 def main():
     # initialize wiki connection
-    wiki.setup_connection(host=config.WIKIROOT,
-                          user=config.USER,
-                          password=config.PASSWORD)
+    try:
+        wiki.setup_connection(host=config.WIKIROOT,
+                              user=config.USER,
+                              password=config.PASSWORD)
+    except:
+        print "Connection to remote wiki broken. Stopping."
+        exit(1)
 
     # try to get the fingerprints:
     try:
