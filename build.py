@@ -53,13 +53,12 @@ def linesFromBulletlist(t):
 
 def download(target, output, category=None):
     if dbgDownload:
-        #try:
-        wiki.download(target=target,
-                      output=output,
-                      category=category)
-        print "downloaded %s" % str(target)
-        #except:
-        #    pass
+        try:
+            wiki.download(target=target,
+                          output=output,
+                          category=category)
+        except:
+            pass
 
 
 def processUML(doc, directory):
