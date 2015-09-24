@@ -356,12 +356,15 @@ def processDocument(docname, fingerprint):
             if doc:
                 print "processing: >>", doc, "<<"
                 mddir = os.path.join(docname, 'md')
-                download(target=doc,
-                         output=mddir)
+                try:
+                    download(target=doc,
+                             output=mddir)
 
-                # process each document separately
-                processFile(doc, mddir)
-                filelist.append(doc)
+                    # process each document separately
+                    processFile(doc, mddir)
+                    filelist.append(doc)
+                except:
+                    pass
 
     # process any additional properties:
     if docprop:
