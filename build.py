@@ -14,11 +14,10 @@ import shutil
 import pickle
 import subprocess
 import pypandoc
-import mwclient
 from pprint import pprint as pp
 from collections import defaultdict
 
-import wikiFetcher
+import wikiconnector as wiki
 import path_checksum
 
 # debugging flags:
@@ -55,12 +54,9 @@ def linesFromBulletlist(t):
 def download(target, output, category=None):
     if dbgDownload:
         try:
-            wikiFetcher.download(host=config.WIKIROOT,
-                                 target=target,
-                                 user=config.USER,
-                                 password=config.PASSWORD,
-                                 output=output,
-                                 category=category)
+            wiki.download(target=target,
+                          output=output,
+                          category=category)
         except:
             pass
 
@@ -397,54 +393,15 @@ def processDocument(docname, fingerprint):
     # report the results back: stdout, pdf file
 
 
-def uploadDocument(doc, excp):
-    """upload both build progress information
-    as well as a potneitally generated PDF """
-
-    wikisite = mwclient.Site(config.WIKIROOT, path='/')
-    wikisite.login(config.USER, config.PASSWORD)
-
-    # deal with any possible exceptions
-
-    # deal with the PDF file:
-    texdir = os.path.join(doc, 'tex')
-    pdffile = os.path.join(texdir,
-                           'main.pdf')
-
-    if os.path.isfile(pdffile):
-        uploadedName = doc + ".pdf"
-        print "pdf exists, uploding ", pdffile, " as ", uploadedName
-        res = wikisite.upload(open(pdffile),
-                              uploadedName,
-                              "Generated file for document " + doc,
-                              ignore=True)
-        pp(res)
-    else:
-        print "no pdf to upload"
-
-    # prepare the build report page
-    page = wikisite.Pages[doc + 'BuildReport']
-    text = page.text()
-    text = "= Build report for {} =\n".format(doc)
-
-    if excp:
-        text += "== Return code ==\n"
-        text += str(excp.returncode)
-        text += "\n== Output ==\n"
-        text += "\n<nowiki>\n"
-        text += excp.output
-        text += "\n</nowiki>\n"
-    else:
-        text += "\n== No errors reported! ==\n"
-
-    text += "\n== PDF file ==\n"
-    text += "\n[[File:" + doc + ".pdf]]\n"
-    text += "\n[[Category:BuildReport]]\n"
-
-    page.save(text)
-
-
 def main():
+    # initialize wiki connection
+    try:
+        wiki.setup_connection(host=config.WIKIROOT,
+                              user=config.USER,
+                              password=config.PASSWORD)
+    except:
+        print "Connection to remote wiki broken. Stopping."
+        exit(1)
 
     # try to get the fingerprints:
     try:
@@ -471,7 +428,7 @@ def main():
                                        fingerprints[line])
 
             if not fingerprints[line] == newfp:
-                uploadDocument(line, e)
+                wiki.upload_document(line, e)
                 fingerprints[line] = newfp
 
     with open('fingerprints', 'w') as fp:
