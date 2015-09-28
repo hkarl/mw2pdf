@@ -324,6 +324,8 @@ def processDocument(docname, fingerprint):
     # make sure that at least md subdirectory is empty
     # later on, might remove all other stuff as well
     # (only clear, when folder already exists)
+    # but only when actually download things!! not in debug mode!
+    if dbgDownload:
     if os.path.exists(os.path.join(docname, 'md')):
         shutil.rmtree(os.path.join(docname, 'md'))
 
@@ -396,6 +398,7 @@ def processDocument(docname, fingerprint):
 def main():
     # initialize wiki connection
     try:
+        if dbgDownload:
         wiki.setup_connection(host=config.WIKIROOT,
                               user=config.USER,
                               password=config.PASSWORD)
@@ -428,6 +431,7 @@ def main():
                                        fingerprints[line])
 
             if not fingerprints[line] == newfp:
+                if dbgDownload:
                 wiki.upload_document(line, e)
                 fingerprints[line] = newfp
 
