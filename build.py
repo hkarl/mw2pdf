@@ -63,7 +63,8 @@ def download(target, output, category=None):
 
 def processUML(doc, directory):
     """extract any included UML, put them in the UML dir,
-    write the reduced document back with an input command"""
+    write the reduced document back with an input command
+    """
 
     print "UMLing ", doc, " in ", directory
 
@@ -169,8 +170,8 @@ def processFile(doc, directory):
     """
 
     if not processRawFile(doc, directory):
-    processUML(doc, directory)
-    processPandoc(doc, directory)
+        processUML(doc, directory)
+        processPandoc(doc, directory)
 
 
 def prepareDirectory(docname, filelist, properties, rawlatex):
@@ -353,8 +354,8 @@ def processDocument(docname, fingerprint):
     # (only clear, when folder already exists)
     # but only when actually download things!! not in debug mode!
     if dbgDownload:
-    if os.path.exists(os.path.join(docname, 'md')):
-        shutil.rmtree(os.path.join(docname, 'md'))
+        if os.path.exists(os.path.join(docname, 'md')):
+            shutil.rmtree(os.path.join(docname, 'md'))
 
     ensure_dir(os.path.join(docname, 'figures'))
     ensure_dir(os.path.join(docname, 'uml'))
@@ -426,9 +427,9 @@ def main():
     # initialize wiki connection
     try:
         if dbgDownload:
-        wiki.setup_connection(host=config.WIKIROOT,
-                              user=config.USER,
-                              password=config.PASSWORD)
+            wiki.setup_connection(host=config.WIKIROOT,
+                                  user=config.USER,
+                                  password=config.PASSWORD)
     except:
         print "Connection to remote wiki broken. Stopping."
         exit(1)
@@ -459,7 +460,7 @@ def main():
 
             if not fingerprints[line] == newfp:
                 if dbgDownload:
-                wiki.upload_document(line, e)
+                    wiki.upload_document(line, e)
                 fingerprints[line] = newfp
 
     with open('fingerprints', 'w') as fp:
