@@ -108,6 +108,31 @@ def processUML(doc, directory):
         f.write(data)
 
 
+def processRawFile(doc, directory):
+    """Check whether the file qualifies as a raw file.
+    If so, just copy it to the tex directory without further handling.
+    Returns True is raw, False if not.
+    """
+
+    # add further tests here if desired:
+    isRawFile = doc.endswith('.bib')
+
+    print "raw: ", doc, isRawFile, directory
+    if isRawFile:
+        srcFilename = os.path.join(directory,
+                                   doc)
+        destFilename = os.path.abspath(
+            os.path.join(directory,
+                         '..',
+                         'tex',
+                         doc))
+            
+        print srcFilename, destFilename
+        shutil.copy(srcFilename, destFilename)
+
+
+
+
 def processPandoc(doc, directory):
     print "pandoc ", doc, directory
 
@@ -138,10 +163,12 @@ def processPandoc(doc, directory):
 
 def processFile(doc, directory):
     """process file doc in directory. Currently defined processing steps:
-    - extract an included umls and run them thorugh plant uml
+    - check whether it is a raw file, then just copy it and do nothing else 
+    - extract all included umls and run them thorugh plant uml
     - run pandoc on the remaining file
     """
 
+    if not processRawFile(doc, directory):
     processUML(doc, directory)
     processPandoc(doc, directory)
 
