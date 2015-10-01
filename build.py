@@ -88,10 +88,20 @@ def processUML(doc, directory):
         with open(os.path.join(umldir,
                                umlfile + '.uml'),
                   'w') as umlhandle:
+
             umlhandle.write("@startuml")
             umlhandle.write(m.group(1))
             umlhandle.write("@enduml")
 
+        # try to extract the title, to use for the caption:
+        title_match = re.search("^title (.*)$",
+                                m.group(1),
+                                re.M)
+        if title_match:
+            title_text = title_match.group(1)
+        else:
+            title_text = "UML figure (no caption provided)"
+            
         # trigger the generation of the actual UML figure
         subprocess.call(['java',
                          '-jar',
@@ -101,7 +111,9 @@ def processUML(doc, directory):
                         cwd=umldir)
 
         data = string.replace(data, m.group(0),
-                              "[[File:" + umlfile + ".eps|UML diagram]]", 1)
+                              "[[File:" + umlfile +
+                              ".eps|" + title_text + "]]",
+                              1)
         i += 1
         m = re.search("<uml>(.*?)</uml>", data, re.S)
 
