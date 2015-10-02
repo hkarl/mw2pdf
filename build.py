@@ -19,11 +19,14 @@ from collections import defaultdict
 
 import wikiconnector as wiki
 import path_checksum
+import bibtexparser
 
 # debugging flags:
 dbgDownload = True
 dbgLatex = True
 
+# global variables
+bibtexkeys = []     # ugly hack to make this global :-/
 
 def ensure_dir(path):
     try:
@@ -233,6 +236,24 @@ def prepareDirectory(docname, filelist, properties, rawlatex):
             includer.write('\\include{' + f + '}\n')
 
 
+def processCiteKeys(doc):
+    """Turn all the autorefs to bibkeys into cites.
+
+    input:
+    - doc is a latex document
+    - global variable: bibtexkeys, contains all the keys found in the bibfiles
+
+    output:
+    - the rewritten doc
+    """
+
+    print "bibtexkeys: ", bibtexkeys
+
+    pattern = 'autoref{(' + '|'.join(bibtexkeys) + ')}'
+    doc = re.sub(pattern, 'cite{\\1}', doc)
+    return doc
+
+
 def preProcessLatex(docdir):
     """Because of limitations in pondoc's mediawiki parser
     and Mediawiki's markup syntax, we need a few tricks 
@@ -265,6 +286,7 @@ def preProcessLatex(docdir):
         print res
         return res
 
+
     print "preprocessing in ", docdir
 
     for f in glob.glob(os.path.join(docdir, '*.tex')):
@@ -292,6 +314,9 @@ def preProcessLatex(docdir):
         # # third, turn any \url references into proper refs, unless they point to a true http
         # doc =  re.sub('\url{(?!http://)(.+?)}', '\\ref{\\1}', doc, flags=re.S)
         
+        # handle cites
+        doc = processCiteKeys(doc)
+
         
         with open(f, 'w')  as fhandle:
             fhandle.write(doc)
@@ -357,6 +382,8 @@ def getSection(text, section):
 
 
 def processDocument(docname, fingerprint):
+    global bibtexkeys
+
     print docname
     download(target=docname,
              output=docname)
@@ -386,6 +413,38 @@ def processDocument(docname, fingerprint):
     doctoc = getSection(doclines, 'TOC')
     docprop = getSection(doclines, 'Properties')
     doclatex = getSection(doclines, 'Latex')
+    docbibtex = getSection(doclines, 'Bibtex')
+
+    if docbibtex:
+        bibtex = ""
+        bibdir = os.path.join(docname, 'bib')
+        ensure_dir(bibdir)
+
+        # download all the bibfiles:
+        for doc in linesFromBulletlist(docbibtex):
+            doc = doc.strip()
+            if doc:
+                try:
+                    download(target=doc,
+                             output=bibdir)
+                except:
+                    pass
+
+        # collect them together and postprocess
+        for f in glob.glob(os.path.join(bibdir, '*')):
+            with open (f, 'r') as fh:
+                bibtex += fh.read()
+
+        bibtexkeys = processBibtex(docname, bibtex)
+    else:
+        # there should be an even empty bib.bib in tex folder
+        with open (os.path.join(docname,
+            'tex', "bib.bib"),
+            'a')  as bh:
+            bh.write('% empty bibtex file')
+        bibtexkeys = []
+
+    print "bibtexkeys (2):" , bibtexkeys
 
     # process the toc: which files to download, include?
     if doctoc:
@@ -434,6 +493,45 @@ def processDocument(docname, fingerprint):
 
     # report the results back: stdout, pdf file
 
+def processBibtex(docname, bibtex):
+    """process a raw bibtex input as downloaded from wiki.
+
+    Main steps:
+    - remove any wiki anchors
+    - sanitize via bibtex library
+    - write out bibtex file
+    - return a list of bibtex keys, necessary for postprocessing latex
+
+    input:
+    - docname: document and subdirectory to be processed
+    - bibtex: string containing the collated files
+
+    output:
+    - list of bibtex keys
+    """
+
+    # remove any wiki anchors, as defined in
+    # https://meta.wikimedia.org/wiki/Help:Anchors
+
+    bibtex = re.sub('<( *)div(.*?)>', '', bibtex, re.S)
+    bibtex = re.sub('<( *)/( *)div(.*?)>', '', bibtex, re.S)
+
+    # sanitize via bibtex library
+    parser = bibtexparser.bparser.BibTexParser()
+    parser.customization = bibtexparser.customization.homogeneize_latex_encoding
+    bibDB = bibtexparser.loads(bibtex,
+                               parser=parser)
+
+                               # dump it to file
+    writer = bibtexparser.bwriter.BibTexWriter()
+    with open (os.path.join(docname, 'tex', 'bib.bib'),
+               'w') as bh:
+        bh.write(writer.write(bibDB))
+
+    # get a list keys to return:
+    keys = [x['ID'] for x in bibDB.entries]
+    print "bibtexkeys (1): ", keys
+    return keys
 
 def main():
     # initialize wiki connection
