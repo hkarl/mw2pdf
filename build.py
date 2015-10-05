@@ -16,6 +16,7 @@ import subprocess
 import pypandoc
 from pprint import pprint as pp
 from collections import defaultdict
+import itertools
 
 import wikiconnector as wiki
 import path_checksum
@@ -472,6 +473,7 @@ def processDocument(docname, fingerprint):
                 except:
                     pass
 
+    #=============================================
     # process any additional properties:
     if docprop:
         tmp = linesFromBulletlist(docprop)
@@ -484,6 +486,26 @@ def processDocument(docname, fingerprint):
     else:
         properties = None
 
+    #=============================================
+    # copy figures to figures directory, fix spaces in file name!
+    figextensions = ['png', 'jpg', 'jpeg', 'eps', 'pdf']
+    figurefiles = list(itertools.chain.from_iterable(
+        [glob.glob(os.path.join(docname,
+                                'md',
+                                '*.' + ext))
+         for ext in figextensions]))
+
+    # just the filenames, not the paths:
+    figurefiles = [os.path.basename(f) for f in figurefiles]
+
+    # and copy the figures to the figures directory,
+    # replace spaces by underscores:
+    for f in figurefiles:
+        shutil.copy(os.path.join(docname, 'md', f),
+                    os.path.join(docname, 'figures', re.sub(' ', '_', f)))
+    
+    print figurefiles
+    
     # prepare directory
     prepareDirectory(docname, filelist, properties, doclatex)
 
