@@ -45,11 +45,20 @@ def linesFromBulletlist(t):
          for x in t
          if re.match(' *\* *', x)]
 
+    # get the content of the link: 
     match = [re.search('\[\[ *(.*?) *\]\]', x) for x in r]
 
     r = [(m.group(1) if m else x.strip())
          for (x, m)
          in zip(r, match)]
+
+    # remove any possible readable name suffices 
+    match = [re.search('(.*?)\|(.*)', x) for x in r]
+
+    r = [(m.group(1) if m else x.strip())
+         for (x, m)
+         in zip(r, match)]
+    
     print r
     return r
 
