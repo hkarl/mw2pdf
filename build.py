@@ -156,7 +156,7 @@ def processRawFile(doc, directory):
         print srcFilename, destFilename
         shutil.copy(srcFilename, destFilename)
 
-
+    return isRawFile
 
 
 def processPandoc(doc, directory):
