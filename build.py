@@ -308,8 +308,8 @@ def preProcessLatex(docdir):
         print m.group(4)
         print "======"
 
-        label = m.group(4)
-        width = m.group(3)
+        label = m.group(3)
+        width = m.group(4)
         width = re.sub(r'\\{', '{', width)
         width = re.sub(r'\\}', '}', width)
 
