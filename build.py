@@ -321,8 +321,14 @@ def preProcessLatex(docdir):
                      doc,
                      flags=re.S)
 
+        # third: there might be undersscorces in labels. right in principle, but
+        # they get escaped by pandoc with an \ . We have to remove the backslash here
+        doc = re.sub(r'\\label{(.*?)}',
+                     lambda m: '\label{' + re.sub(r'\\', '', m.group(1)) + '}',
+                     doc)
+        
         # looks not necessary on account of autoref: 
-        # # third, turn any \url references into proper refs, unless they point to a true http
+        # # foruth, turn any \url references into proper refs, unless they point to a true http
         # doc =  re.sub('\url{(?!http://)(.+?)}', '\\ref{\\1}', doc, flags=re.S)
         
         # handle cites
