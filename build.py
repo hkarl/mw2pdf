@@ -284,14 +284,20 @@ def preProcessLatex(docdir):
         print m.group(4)
         print "======"
 
-        tmp = m.group(4)
-        tmp = re.sub(r'\\{', '{', tmp)
-        tmp = re.sub(r'\\}', '}', tmp)
+        label = m.group(4)
+        width = m.group(3)
+        width = re.sub(r'\\{', '{', width)
+        width = re.sub(r'\\}', '}', width)
+
+        # support percentage statements in table column widths:
+        width = re.sub(r'p\s*{\s*([0-9]+)\s*\\%\s*}', 'p{.\\1\\\\textwidth}', width, re.S)
+        print "width: ", width
+        print "======"
         
         res = r"\begin{{longtable}}[c]{{{}}} \caption{{{}}}\label{{{}}}\tabularnewline".format(
-            m.group(3),
+            width,
             m.group(2),
-            tmp,
+            label,
             )
             
         print res
