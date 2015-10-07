@@ -24,8 +24,8 @@ from bibtexHandler import processBibtex
 
 # debugging flags:
 dbgDownload = True
-dbgLatex = False
-dbgUML = False 
+dbgLatex = True
+dbgUML = True
 
 # global variables
 bibtexkeys = []     # ugly hack to make this global :-/
@@ -599,8 +599,8 @@ def main():
                                        fingerprints[line])
 
             if not fingerprints[line] == newfp:
-                # if dbgDownload:
-                #     wiki.upload_document(line, e)
+                if dbgDownload:
+                    wiki.upload_document(line, e)
                 fingerprints[line] = newfp
 
     with open('fingerprints', 'w') as fp:
