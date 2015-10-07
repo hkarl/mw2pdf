@@ -24,7 +24,8 @@ from bibtexHandler import processBibtex
 
 # debugging flags:
 dbgDownload = True
-dbgLatex = True
+dbgLatex = False
+dbgUML = False 
 
 # global variables
 bibtexkeys = []     # ugly hack to make this global :-/
@@ -114,9 +115,9 @@ def processUML(doc, directory):
             title_text = title_match.group(1)
         else:
             title_text = "UML figure (no caption provided)"
-            
+
         if not dbgUML:
-        # trigger the generation of the actual UML figure
+            # trigger the generation of the actual UML figure
             subprocess.call(['java',
             	             '-jar',
                 	     '../../plantuml.jar',
@@ -153,7 +154,7 @@ def processRawFile(doc, directory):
                          '..',
                          'tex',
                          doc))
-            
+
         print srcFilename, destFilename
         shutil.copy(srcFilename, destFilename)
 
@@ -161,6 +162,29 @@ def processRawFile(doc, directory):
 
 
 def processPandoc(doc, directory):
+
+    def guessFormat(filename):
+        """Try to guess whether the file contains 
+        clean mediawiki syntax or messed-up HTML markup from 
+        the stupid Rich Editor 
+        """
+
+        with open (filename, 'r') as f:
+            text = f.read()
+
+        htmlCount = len(re.findall("< *h[1-9] *>", text))
+        wikiCount = len(re.findall("=+.+=+", text))
+
+        if htmlCount > wikiCount:
+            frmt = "html"
+        else:
+            frmt = "mediawiki"
+
+        print "guessing format: ", filename, frmt
+        
+        return frmt
+        
+    
     print "pandoc ", doc, directory
 
     filename = os.path.join(directory,
@@ -179,7 +203,7 @@ def processPandoc(doc, directory):
          ]
 
     output = pypandoc.convert(filename,
-                              format='mediawiki',
+                              format=guessFormat(filename),
                               to='latex',
                               filters=filters,
                               extra_args=['--chapters'],
@@ -190,7 +214,7 @@ def processPandoc(doc, directory):
 
 def processFile(doc, directory):
     """process file doc in directory. Currently defined processing steps:
-    - check whether it is a raw file, then just copy it and do nothing else 
+    - check whether it is a raw file, then just copy it and do nothing else
     - extract all included umls and run them thorugh plant uml
     - run pandoc on the remaining file
     """
@@ -267,9 +291,9 @@ def processCiteKeys(doc):
 
 def preProcessLatex(docdir):
     """Because of limitations in pondoc's mediawiki parser
-    and Mediawiki's markup syntax, we need a few tricks 
-    to get the right LaTeX for figure and table crossreferencing 
-    as well as table column styles 
+    and Mediawiki's markup syntax, we need a few tricks
+    to get the right LaTeX for figure and table crossreferencing
+    as well as table column styles
     """
 
     def replace_tablehead(m):
@@ -299,7 +323,7 @@ def preProcessLatex(docdir):
             m.group(2),
             label,
             )
-            
+
         print res
         return res
 
@@ -320,7 +344,7 @@ def preProcessLatex(docdir):
                      replace_tablehead,
                      doc,
                      flags=re.S)
-        
+
         # second, lets create labels from the text after a hashmark of a caption:
         doc = re.sub(r'\\caption{(.*?)(\\#(.*?))}',
                      r'\caption{\1}\label{\3}',
@@ -333,24 +357,24 @@ def preProcessLatex(docdir):
                      lambda m: '\label{' + re.sub(r'\\', '', m.group(1)) + '}',
                      doc)
         
-        # looks not necessary on account of autoref: 
+        # looks not necessary on account of autoref:
         # # foruth, turn any \url references into proper refs, unless they point to a true http
         # doc =  re.sub('\url{(?!http://)(.+?)}', '\\ref{\\1}', doc, flags=re.S)
-        
+
         # handle cites
         doc = processCiteKeys(doc)
 
-        
+
         with open(f, 'w')  as fhandle:
             fhandle.write(doc)
-        
-            
+
+
 def processLatex(docname):
     # run latx
     print os.path.join(docname, 'tex')
 
     preProcessLatex(os.path.join(docname, 'tex'))
-    
+
     try:
         if dbgLatex:
             subprocess.check_output(
@@ -447,6 +471,7 @@ def processDocument(docname, fingerprint):
         for doc in linesFromBulletlist(docbibtex):
             doc = doc.strip()
             if doc:
+                # add seaprate case to deal with mendeley group
                 try:
                     download(target=doc,
                              output=bibdir)
@@ -574,8 +599,8 @@ def main():
                                        fingerprints[line])
 
             if not fingerprints[line] == newfp:
-                if dbgDownload:
-                    wiki.upload_document(line, e)
+                # if dbgDownload:
+                #     wiki.upload_document(line, e)
                 fingerprints[line] = newfp
 
     with open('fingerprints', 'w') as fp:
