@@ -289,9 +289,9 @@ def preProcessLatex(docdir):
         tmp = re.sub(r'\\}', '}', tmp)
         
         res = r"\begin{{longtable}}[c]{{{}}} \caption{{{}}}\label{{{}}}\tabularnewline".format(
-            tmp,
-            m.group(2),
             m.group(3),
+            m.group(2),
+            tmp,
             )
             
         print res
@@ -309,7 +309,7 @@ def preProcessLatex(docdir):
             doc = fhandle.read()
 
         # first, let's see if there is a table head with a caption, and labal, and position marks
-        doc = re.sub(r'\\begin{longtable}\[c\]{(.*?)}\n\\caption{(.*?)\\#(.*?)\\#(.*)}\\tabularnewline',
+        doc = re.sub(r'\\begin{longtable}\[c\]{(.*?)}\n\\caption{(.*?)\\#(.*?)\\#(.*?)}\\tabularnewline',
                      # r'\\begin{longtable}[c]{\4}\caption{\2}\label{\3}\tabularnewline',
                      replace_tablehead,
                      doc,
