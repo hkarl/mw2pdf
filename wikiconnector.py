@@ -148,6 +148,9 @@ def upload_document(doc, excp):
     text = page.text()
     text = "= Build report for {} =\n".format(doc)
 
+    text += "\n== PDF file ==\n"
+    text += "\n[[File:" + doc + ".pdf]]\n"
+    
     if excp:
         text += "== Return code ==\n"
         text += str(excp.returncode)
@@ -158,8 +161,6 @@ def upload_document(doc, excp):
     else:
         text += "\n== No errors reported! ==\n"
 
-    text += "\n== PDF file ==\n"
-    text += "\n[[File:" + doc + ".pdf]]\n"
     text += "\n[[Category:BuildReport]]\n"
 
     page.save(text)
