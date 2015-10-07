@@ -115,6 +115,7 @@ def processUML(doc, directory):
         else:
             title_text = "UML figure (no caption provided)"
             
+        if not dbgUML:
         # trigger the generation of the actual UML figure
         subprocess.call(['java',
                          '-jar',
