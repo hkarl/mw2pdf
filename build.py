@@ -117,12 +117,12 @@ def processUML(doc, directory):
             
         if not dbgUML:
         # trigger the generation of the actual UML figure
-        subprocess.call(['java',
-                         '-jar',
-                         '../../plantuml.jar',
-                         '-teps',
-                         umlfile+'.uml'],
-                        cwd=umldir)
+            subprocess.call(['java',
+            	             '-jar',
+                	     '../../plantuml.jar',
+                             '-teps',
+                             umlfile+'.uml'],
+                             cwd=umldir)
 
         data = string.replace(data, m.group(0),
                               "[[File:" + umlfile +
