@@ -27,7 +27,7 @@ def linkhandler(key, value, frmt, meta):
                     link = link.split('#')[1]
 
                 sys.stderr.write("link: {}\n---\n\n".format(link))
-                link = '-'.join([x.lower() for x in link.split('_')])
+                link = '_'.join([x.lower() for x in link.split('_')])
                 return RawInline('latex', "\\autoref{{{}}}".format(link))
 
 
