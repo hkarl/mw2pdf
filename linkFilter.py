@@ -24,8 +24,16 @@ def linkhandler(key, value, frmt, meta):
 
             if ("talk:" in link.lower()) and (kind == "wikilink"):
                 # deal with talk extension
+                # sys.stderr.write('unknown: {}\n'.format([u['c'] for u in unknown]))
+
+                textlist = [u['c'] if u['c'] else ' ' for u in unknown]
+                # sys.stderr.write('unknown: {}\n'.format(textlist))
+
+                textlist = ''.join(textlist)
+                # sys.stderr.write('unknown: {}\n'.format(textlist))
+
                 try:
-                    return RawInline('latex', unknown[0]['c'])
+                    return RawInline('latex', textlist)
                 except:
                     return RawInline('latex', '??')
                     
