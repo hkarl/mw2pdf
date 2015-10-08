@@ -356,7 +356,10 @@ def preProcessLatex(docdir):
 
         # second, lets create labels from the text after a hashmark of a caption:
         doc = re.sub(r'\\caption{(.*?)(\\#(.*?))}',
-                     r'\caption{\1}\label{\3}',
+                     # r'\caption{\1}\label{\3}',
+                     lambda m: r'\caption{{{}}}\label{{{}}}'.format(
+                         m.group(1),
+                         m.group(3).lower()),
                      doc,
                      flags=re.S)
 
