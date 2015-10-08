@@ -308,7 +308,10 @@ def preProcessLatex(docdir):
         print m.group(4)
         print "======"
 
+        caption = m.group(2)
+
         label = m.group(3).lower()
+        
         width = m.group(4)
         width = re.sub(r'\\{', '{', width)
         width = re.sub(r'\\}', '}', width)
@@ -317,12 +320,18 @@ def preProcessLatex(docdir):
         width = re.sub(r'p\s*{\s*([0-9]+)\s*\\%\s*}', 'p{.\\1\\\\textwidth}', width, re.S)
         print "width: ", width
         print "======"
-        
-        res = r"\begin{{longtable}}[c]{{{}}} \caption{{{}}}\label{{{}}}\tabularnewline".format(
-            width,
-            m.group(2),
-            label,
+
+        if caption:
+            res = r"\begin{{longtable}}[c]{{{}}} \caption{{{}}}\label{{{}}}\tabularnewline".format(
+                width,
+                caption,
+                label,
             )
+        else:
+            res = r"\begin{{longtable}}[c]{{{}}}\tabularnewline".format(
+                width,
+            )
+            
 
         print res
         return res
