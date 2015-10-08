@@ -377,6 +377,7 @@ def processLatex(docname):
 
     try:
         if dbgLatex:
+            print "latex first pass"
             subprocess.check_output(
                 ['pdflatex',
                  '-shell-escape',
@@ -385,6 +386,14 @@ def processLatex(docname):
                 stderr=subprocess.STDOUT,
                 cwd=os.path.join(docname, 'tex'),
             )
+            print "bibtex" 
+            subprocess.check_output(
+                ['bibtex',
+                 'main'],
+                stderr=subprocess.STDOUT,
+                cwd=os.path.join(docname, 'tex'),
+            )
+            print "latex second pass"
             subprocess.check_output(
                 ['pdflatex',
                  '-shell-escape',
@@ -393,6 +402,7 @@ def processLatex(docname):
                 stderr=subprocess.STDOUT,
                 cwd=os.path.join(docname, 'tex'),
             )
+            print "latex third pass"
             subprocess.check_output(
                 ['pdflatex',
                  '-shell-escape',
