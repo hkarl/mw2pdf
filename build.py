@@ -370,6 +370,38 @@ def preProcessLatex(docdir):
 
 
 def processLatex(docname):
+
+    def oneRunLatex(docname):
+        try:
+            subprocess.check_output(
+                ['pdflatex',
+                 '-shell-escape',
+                 '-interaction=nonstopmode',
+                 'main.tex'],
+                stderr=subprocess.STDOUT,
+                cwd=os.path.join(docname, 'tex'),
+            )
+        except subprocess.CalledProcessError as e:
+            print e, e.output
+            pass
+
+        return e
+
+    def oneRunBibtex(docname):
+        try:
+            subprocess.check_output(
+                ['bibtex',
+                 'main'],
+                stderr=subprocess.STDOUT,
+                cwd=os.path.join(docname, 'tex'),
+            )
+        except subprocess.CalledProcessError as e:
+            print e, e.output
+            pass
+
+        return e
+        
+            
     # run latx
     print os.path.join(docname, 'tex')
 
@@ -378,43 +410,14 @@ def processLatex(docname):
     try:
         if dbgLatex:
             print "latex first pass"
-            subprocess.check_output(
-                ['pdflatex',
-                 '-shell-escape',
-                 '-interaction=nonstopmode',
-                 'main.tex'],
-                stderr=subprocess.STDOUT,
-                cwd=os.path.join(docname, 'tex'),
-            )
-            print "bibtex" 
-            subprocess.check_output(
-                ['bibtex',
-                 'main'],
-                stderr=subprocess.STDOUT,
-                cwd=os.path.join(docname, 'tex'),
-            )
+            e = oneRunLatex(docname)
+            print "bibtex"
+            e = oneRunBibtex(docname)
             print "latex second pass"
-            subprocess.check_output(
-                ['pdflatex',
-                 '-shell-escape',
-                 '-interaction=nonstopmode',
-                 'main.tex'],
-                stderr=subprocess.STDOUT,
-                cwd=os.path.join(docname, 'tex'),
-            )
+            e = oneRunLatex(docname)
             print "latex third pass"
-            subprocess.check_output(
-                ['pdflatex',
-                 '-shell-escape',
-                 '-interaction=nonstopmode',
-                 'main.tex'],
-                stderr=subprocess.STDOUT,
-                cwd=os.path.join(docname, 'tex'),
-            )
-        e = None
-    except subprocess.CalledProcessError as e:
-        print e, e.output
-        pass
+            e = oneRunLatex(docname)
+
     except Exception as e:
         print e
 
