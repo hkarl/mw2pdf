@@ -22,6 +22,14 @@ def linkhandler(key, value, frmt, meta):
         if frmt == 'latex':
             [unknown, [link, kind]] = value
 
+            if ("talk:" in link.lower()) and (kind == "wikilink"):
+                # deal with talk extension
+                try:
+                    return RawInline('latex', unknown[0]['c'])
+                except:
+                    return RawInline('latex', '??')
+                    
+            
             if kind == "wikilink":
                 if "#" in link:
                     link = link.split('#')[1]
