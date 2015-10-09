@@ -151,23 +151,30 @@ def upload_document(doc, excp):
     text += "\n== PDF file ==\n"
     text += "\n[[File:" + doc + ".pdf]]\n"
     
+    # deal with the exceptions: 
     if excp:
         text += "== Return code ==\n"
         try: 
+            # 
         text += str(excp.returncode)
         except:
+            # 
             text += "(no returncode found)"
             
         text += "\n== Output ==\n"
         text += "\n<nowiki>\n"
         try:
+            # 
         text += excp.output
         except:
+            # 
             text += "(no error output exists)"
             
         text += "\n</nowiki>\n"
     else:
         text += "\n== No errors reported! ==\n"
+    # done 
+
 
     text += "\n[[Category:BuildReport]]\n"
 
