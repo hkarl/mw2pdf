@@ -156,7 +156,7 @@ def upload_document(doc, excp):
         text += "== Return code ==\n"
         try: 
             # 
-        text += str(excp.returncode)
+    	    text += str(excp.returncode)
         except:
             # 
             text += "(no returncode found)"
@@ -165,7 +165,7 @@ def upload_document(doc, excp):
         text += "\n<nowiki>\n"
         try:
             # 
-        text += excp.output
+            text += excp.output
         except:
             # 
             text += "(no error output exists)"
