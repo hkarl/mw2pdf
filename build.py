@@ -489,7 +489,26 @@ def processDocument(docname, fingerprint):
     docprop = getSection(doclines, 'Properties')
     doclatex = getSection(doclines, 'Latex')
     docbibtex = getSection(doclines, 'Bibtex')
+    docabstract = getSection(doclines, 'Abstract')
 
+    # --------------------------------------------
+    # handle abstract, ensure there is always a possibly empty file
+
+    abstractFname = os.path.join(docname,
+                                 'md',
+                                 'propertiesAbstract.md')
+    if not docabstract:
+        docabstract = [' ']
+
+    with open(abstractFname, 'w') as f:
+        for l in docabstract:
+            f.write(l)
+
+    processFile('propertiesAbstract',
+                os.path.join(docname, 'md'))
+            
+    # -------------------------------------------
+    # handle bibtex entries
     if docbibtex:
         bibtex = ""
         bibdir = os.path.join(docname, 'bib')
