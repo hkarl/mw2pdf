@@ -384,6 +384,7 @@ def preProcessLatex(docdir):
 def processLatex(docname):
 
     def oneRunLatex(docname):
+        e = None 
         try:
             subprocess.check_output(
                 ['pdflatex',
@@ -400,6 +401,7 @@ def processLatex(docname):
         return e
 
     def oneRunBibtex(docname):
+        e = None 
         try:
             subprocess.check_output(
                 ['bibtex',
@@ -419,6 +421,7 @@ def processLatex(docname):
 
     preProcessLatex(os.path.join(docname, 'tex'))
 
+    e = None
     try:
         if dbgLatex:
             print "latex first pass"
