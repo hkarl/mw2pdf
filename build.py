@@ -22,6 +22,8 @@ import wikiconnector as wiki
 import path_checksum
 from bibtexHandler import processBibtex
 
+import wikiBib
+
 # debugging flags:
 dbgDownload = True
 dbgLatex = True
@@ -47,20 +49,20 @@ def linesFromBulletlist(t):
          for x in t
          if re.match(' *\* *', x)]
 
-    # get the content of the link: 
+    # get the content of the link:
     match = [re.search('\[\[ *(.*?) *\]\]', x) for x in r]
 
     r = [(m.group(1) if m else x.strip())
          for (x, m)
          in zip(r, match)]
 
-    # remove any possible readable name suffices 
+    # remove any possible readable name suffices
     match = [re.search('(.*?)\|(.*)', x) for x in r]
 
     r = [(m.group(1) if m else x.strip())
          for (x, m)
          in zip(r, match)]
-    
+
     print r
     return r
 
@@ -119,8 +121,8 @@ def processUML(doc, directory):
         if not dbgUML:
             # trigger the generation of the actual UML figure
             subprocess.call(['java',
-            	             '-jar',
-                	     '../../plantuml.jar',
+                             '-jar',
+                             '../../plantuml.jar',
                              '-teps',
                              umlfile+'.uml'],
                              cwd=umldir)
@@ -164,9 +166,9 @@ def processRawFile(doc, directory):
 def processPandoc(doc, directory):
 
     def guessFormat(filename):
-        """Try to guess whether the file contains 
-        clean mediawiki syntax or messed-up HTML markup from 
-        the stupid Rich Editor 
+        """Try to guess whether the file contains
+        clean mediawiki syntax or messed-up HTML markup from
+        the stupid Rich Editor
         """
 
         with open (filename, 'r') as f:
@@ -181,10 +183,10 @@ def processPandoc(doc, directory):
             frmt = "mediawiki"
 
         print "guessing format: ", filename, frmt
-        
+
         return frmt
-        
-    
+
+
     print "pandoc ", doc, directory
 
     filename = os.path.join(directory,
@@ -282,10 +284,33 @@ def processCiteKeys(doc):
     - the rewritten doc
     """
 
-    print "bibtexkeys: ", bibtexkeys
+    global bibtexkeys
 
-    pattern = 'autoref{(' + '|'.join(bibtexkeys) + ')}'
+    # because autoref has the underscores translated to -,
+    # (done by the linkFilter.py filter) 
+    # we have to do the same thing here to the bibtexkeys.
+
+    newbibkeys = [re.sub('_', '-', x) for x in bibtexkeys]
+    print "bibtexkeys: ", newbibkeys
+
+    pattern = 'autoref{(' + '|'.join(newbibkeys) + ')}'
     doc = re.sub(pattern, 'cite{\\1}', doc)
+
+    # and now we have to replace them back to the underscore version,
+    # which is the one that is in the bibtex file, probably
+    # (this is far too complicated - need a better way to deal with
+    # the bloody stupid inconstiency of autoref vs label generation)
+
+    deltaKeys = [(x, y)
+                 for (x, y) in zip(bibtexkeys, newbibkeys)
+                 if not x == y]
+    print "delatakeys: ", deltaKeys
+    for orgkey, wrongkey in deltaKeys:
+        o = '\\cite{' + orgkey + '}'
+        w = '\\cite{' + wrongkey + '}'
+
+        doc = doc.replace(w, o)
+    
     return doc
 
 
@@ -311,7 +336,7 @@ def preProcessLatex(docdir):
         caption = m.group(2)
 
         label = m.group(3).lower()
-        
+
         width = m.group(4)
         width = re.sub(r'\\{', '{', width)
         width = re.sub(r'\\}', '}', width)
@@ -331,7 +356,7 @@ def preProcessLatex(docdir):
             res = r"\begin{{longtable}}[c]{{{}}}\tabularnewline".format(
                 width,
             )
-            
+
 
         print res
         return res
@@ -368,7 +393,7 @@ def preProcessLatex(docdir):
         doc = re.sub(r'\\label{(.*?)}',
                      lambda m: '\label{' + re.sub(r'\\', '', m.group(1)) + '}',
                      doc)
-        
+
         # looks not necessary on account of autoref:
         # # foruth, turn any \url references into proper refs, unless they point to a true http
         # doc =  re.sub('\url{(?!http://)(.+?)}', '\\ref{\\1}', doc, flags=re.S)
@@ -414,8 +439,8 @@ def processLatex(docname):
             pass
 
         return e
-        
-            
+
+
     # run latx
     print os.path.join(docname, 'tex')
 
@@ -490,7 +515,8 @@ def processDocument(docname, fingerprint):
     doclatex = getSection(doclines, 'Latex')
     docbibtex = getSection(doclines, 'Bibtex')
     docabstract = getSection(doclines, 'Abstract')
-
+    docwikibib = getSection(doclines, 'Wikibib')
+    
     # --------------------------------------------
     # handle abstract, ensure there is always a possibly empty file
 
@@ -509,11 +535,13 @@ def processDocument(docname, fingerprint):
             
     # -------------------------------------------
     # handle bibtex entries
-    if docbibtex:
+
+    if docbibtex or docwikibib:
         bibtex = ""
         bibdir = os.path.join(docname, 'bib')
         ensure_dir(bibdir)
 
+    if docbibtex:
         # download all the bibfiles:
         for doc in linesFromBulletlist(docbibtex):
             doc = doc.strip()
@@ -533,14 +561,32 @@ def processDocument(docname, fingerprint):
         bibtexkeys = processBibtex(docname, bibtex)
     else:
         # there should be an even empty bib.bib in tex folder
-        with open (os.path.join(docname,
-            'tex', "bib.bib"),
-            'a')  as bh:
+        with open(os.path.join(docname,
+                               'tex', "bib.bib"),
+                  'a')  as bh:
             bh.write('% empty bibtex file')
         bibtexkeys = []
 
-    print "bibtexkeys (2):" , bibtexkeys
+    if docwikibib:
+        for doc in linesFromBulletlist(docwikibib):
+            doc = doc.strip()
+            if doc:
+                # add seaprate case to deal with mendeley group
+                try:
+                    download(target=doc,
+                             output=bibdir)
+                except:
+                    pass
 
+                bibtexkeys += wikiBib.wikibib(infile=os.path.join(bibdir,
+                                                                  doc + '.md'),
+                                              outfile=os.path.join(docname,
+                                                                   'tex',
+                                                                   'bib.bib'))
+
+    print "bibtexkeys (2):", bibtexkeys
+
+    #--------------------------------------------------
     # process the toc: which files to download, include?
     if doctoc:
         for doc in linesFromBulletlist(doctoc):
@@ -588,9 +634,9 @@ def processDocument(docname, fingerprint):
     for f in figurefiles:
         shutil.copy(os.path.join(docname, 'md', f),
                     os.path.join(docname, 'figures', re.sub(' ', '_', f)))
-    
+
     print figurefiles
-    
+
     # prepare directory
     prepareDirectory(docname, filelist, properties, doclatex)
 
