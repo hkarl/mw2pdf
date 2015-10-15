@@ -1,5 +1,4 @@
-#!/usr/bin/python
-
+#!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
 #original (does not work on Linux or default OSX):
 #!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
 
@@ -43,7 +42,7 @@ def linkhandler(key, value, frmt, meta):
                     link = link.split('#')[1]
 
                 sys.stderr.write("link: {}\n---\n\n".format(link))
-                link = '_'.join([x.lower() for x in link.split('_')])
+                link = '-'.join([x.lower() for x in link.split('_')])
                 return RawInline('latex', "\\autoref{{{}}}".format(link))
 
 
