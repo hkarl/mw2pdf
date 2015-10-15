@@ -6,6 +6,7 @@ import bibtexparser
 import re
 import os
 
+
 def processBibtex(docname, bibtex):
     """process a raw bibtex input as downloaded from wiki.
 
