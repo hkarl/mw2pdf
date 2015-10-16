@@ -536,10 +536,15 @@ def processDocument(docname, fingerprint):
     # -------------------------------------------
     # handle bibtex entries
 
-    if docbibtex or docwikibib:
-        bibtex = ""
-        bibdir = os.path.join(docname, 'bib')
-        ensure_dir(bibdir)
+    bibtex = ""
+    bibdir = os.path.join(docname, 'bib')
+    ensure_dir(bibdir)
+    # there should always be an even empty bib.bib in tex folder
+    with open(os.path.join(docname,
+                           'tex', "bib.bib"),
+              'w')  as bh:
+        bh.write('% empty bibtex file\n')
+    bibtexkeys = []
 
     if docbibtex:
         # download all the bibfiles:
@@ -559,13 +564,6 @@ def processDocument(docname, fingerprint):
                 bibtex += fh.read()
 
         bibtexkeys = processBibtex(docname, bibtex)
-    else:
-        # there should be an even empty bib.bib in tex folder
-        with open(os.path.join(docname,
-                               'tex', "bib.bib"),
-                  'a')  as bh:
-            bh.write('% empty bibtex file')
-        bibtexkeys = []
 
     if docwikibib:
         for doc in linesFromBulletlist(docwikibib):
