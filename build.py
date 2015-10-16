@@ -306,7 +306,12 @@ def processCiteKeys(doc):
                  if not x == y]
     print "delatakeys: ", deltaKeys
     for orgkey, wrongkey in deltaKeys:
-        o = '\\cite{' + orgkey + '}'
+        # we need to lower-case the citation key for the bib file
+        # because the references get all lower-cased by linkFilter
+        # (this is becuase the mediawiki reader lower-cases all the
+        # labels for headings, and there is no easy way to distinguish
+        # links to headings from links to references ) 
+        o = '\\cite{' + orgkey.lower() + '}'
         w = '\\cite{' + wrongkey + '}'
 
         doc = doc.replace(w, o)

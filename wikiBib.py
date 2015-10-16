@@ -28,7 +28,7 @@ def readwiki(filename):
                 entries.append(d)
 
             # start remembering the new entry:
-            d = {'key': key.strip(),
+            d = {'key': key.strip().lower(),
                  'type': 'misc'}
 
             print "dict: ", d
