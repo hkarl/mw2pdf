@@ -25,8 +25,6 @@ from bibtexHandler import processBibtex
 
 import wikiBib
 
-# debugging flags:
-dbgUML = True
 
 # global variables
 bibtexkeys = []     # ugly hack to make this global :-/
@@ -116,7 +114,7 @@ def processUML(doc, directory):
         else:
             title_text = "UML figure (no caption provided)"
 
-        if not dbgUML:
+        if True:
             # trigger the generation of the actual UML figure
             subprocess.call(['java',
                              '-jar',
