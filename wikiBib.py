@@ -20,7 +20,7 @@ def readwiki(filename):
             m = re.match('\s*=+(.*?)=+', l)
             key = m.group(1)
 
-            print "found key", key
+            # print "found key", key
 
             # if no exception up to hear, we have found a new entry strat
             # store the old entry:
@@ -31,12 +31,12 @@ def readwiki(filename):
             d = {'key': key.strip().lower(),
                  'type': 'misc'}
 
-            print "dict: ", d
+            # print "dict: ", d
             continue
         except:
             pass
 
-        print l
+        # print l
         m = re.match('\s*\*\s*(.*?)\s*:\s*(.*)', l)
         try:
             key = m.group(1)
