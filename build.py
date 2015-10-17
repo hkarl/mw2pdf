@@ -17,6 +17,7 @@ import pypandoc
 from pprint import pprint as pp
 from collections import defaultdict
 import itertools
+import argparse
 
 import wikiconnector as wiki
 import path_checksum
@@ -486,21 +487,28 @@ def getSection(text, section):
         return None
 
 
-def processDocument(docname, fingerprint):
+def processDocument(docname,
+                    fingerprint,
+                    downloadFlag,
+                    latexFlag):
     global bibtexkeys
 
-    print docname
-    download(target=docname,
-             output=docname)
+    print "========================================"
+    print "processing document: ", docname
 
-    # make sure that at least md subdirectory is empty
-    # later on, might remove all other stuff as well
-    # (only clear, when folder already exists)
-    # but only when actually download things!! not in debug mode!
-    if dbgDownload:
+    if downloadFlag:
+        download(target=docname,
+                 output=docname)
+
+        # make sure that at least md subdirectory is empty
+        # later on, might remove all other stuff as well
+        # (only clear, when folder already exists)
+        # but only when actually downloading things!! not in debug mode!
+
         if os.path.exists(os.path.join(docname, 'md')):
             shutil.rmtree(os.path.join(docname, 'md'))
 
+            
     ensure_dir(os.path.join(docname, 'figures'))
     ensure_dir(os.path.join(docname, 'uml'))
     ensure_dir(os.path.join(docname, 'md'))
@@ -648,10 +656,10 @@ def processDocument(docname, fingerprint):
         [os.path.join(docname, 'md')])
 
     print "fingerprints: ", fingerprint, newfingerprint
-    if not fingerprint == newfingerprint:
+    if (latexFlag and (not fingerprint == newfingerprint)):
         e = processLatex(docname)
     else:
-        print "nothing has changed in ", docname
+        print "nothing to be done in ", docname
         e = None
 
     return e, newfingerprint
@@ -659,10 +667,81 @@ def processDocument(docname, fingerprint):
     # report the results back: stdout, pdf file
 
 
-def main():
+def setup_cli_parser():
+    """
+    Command-line switches, mostly to help with debugging. 
+    """
+
+    parser=argparse.ArgumentParser(
+        description="Translate a set of Mediwiki into PDF via pandoc and LaTeX.")
+
+    parser.add_argument("--download",
+                        dest="download",
+                        default=False,
+                        action="store_true",
+                        help="Download from the given wiki",
+                        )
+
+    parser.add_argument("--document",
+                        dest="document",
+                        default=None,
+                        help="Only process the given document"
+                        )
+
+    parser.add_argument("--latex",
+                        dest="latex",
+                        default=False,
+                        action="store_true",
+                        help="Run LaTeX",
+                        )
+
+    parser.add_argument("--upload",
+                        dest="upload",
+                        default=False,
+                        action="store_true",
+                        help="Upload resulting PDF to wiki",
+                        )
+
+    parser.add_argument("--ignore-fingerprint",
+                        dest="ignoreFingerprint",
+                        default=False,
+                        action="store_true",
+                        help="Ignore fingerprint, always process",
+                        )
+    
+    return parser
+
+
+def get_documentlist(document, download):
+    """Determine documents to process. 
+    Command-line args takes precedence over anything 
+    that could be downloaded.
+    """
+    if document:
+        return [document]
+
+    documentlist = []
+    if download:
+        # start the download
+        print "downloading documentlist"
+        download(target=config.DOCUMENTLIST,
+                 output="DocumentList")
+
+        # process the downloaded documentlist: 
+        fname = os.path.join('DocumentList',
+                             config.DOCUMENTLIST + '.md')
+        with open(fname,
+                  'r') as f:
+            documentlist = linesFromBulletlist(f.readlines())
+
+    return documentlist
+    
+    
+def main(args):
+
     # initialize wiki connection
     try:
-        if dbgDownload:
+        if args.download:
             wiki.setup_connection(host=config.WIKIROOT,
                                   user=config.USER,
                                   password=config.PASSWORD)
@@ -677,30 +756,32 @@ def main():
     except:
         fingerprints = defaultdict(str)
 
-    # start the download
-    print "downloading documentlist"
-    download(target=config.DOCUMENTLIST,
-             output="DocumentList")
-
-    print os.getcwd()
-    fname = os.path.join('DocumentList',
-                         config.DOCUMENTLIST + '.md')
-    print fname
-    print os.path.abspath(fname)
     # iterate over the documents contained in documentlist:
-    with open(fname,
-              'r') as f:
-        for line in linesFromBulletlist(f.readlines()):
-            e, newfp = processDocument(line,
-                                       fingerprints[line])
+    for line in get_documentlist(args.document,
+                                 args.download):
 
-            if not fingerprints[line] == newfp:
-                if dbgDownload:
-                    wiki.upload_document(line, e)
-                fingerprints[line] = newfp
+        # if we are to ignore fingerprints, let's just pass in a stupid
+        # value:
+        e, newfp = processDocument(line,
+                                   (fingerprints[line]
+                                    if not args.ignoreFingerprint
+                                    else None),
+                                   args.download,
+                                   args.latex)
+
+        if ((not fingerprints[line] == newfp) or
+            (args.ignoreFingerprint)):
+            if args.upload:
+                wiki.upload_document(line, e)
+                
+        fingerprints[line] = newfp
 
     with open('fingerprints', 'w') as fp:
         pickle.dump(fingerprints, fp)
 
+
 if __name__ == '__main__':
-    main()
+    parser = setup_cli_parser()
+    args = parser.parse_args()
+    
+    main(args)
