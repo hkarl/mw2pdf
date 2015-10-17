@@ -509,7 +509,7 @@ def processDocument(docname,
 
     filelist = []
 
-    # now grab the files for this document:
+    # now grab the files/wiki pages for this document:
     with open(os.path.join(docname,
                            docname + '.md'),
               'r') as doc:
@@ -534,7 +534,7 @@ def processDocument(docname,
 
     with open(abstractFname, 'w') as f:
         for l in docabstract:
-            f.write(l)
+            f.write(l + "\n")
 
     processFile('propertiesAbstract',
                 os.path.join(docname, 'md'),
