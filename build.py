@@ -26,7 +26,6 @@ from bibtexHandler import processBibtex
 import wikiBib
 
 # debugging flags:
-dbgLatex = True
 dbgUML = True
 
 # global variables
@@ -445,22 +444,16 @@ def processLatex(docname):
         return e
 
 
-    # run latx
-    print os.path.join(docname, 'tex')
-
-    preProcessLatex(os.path.join(docname, 'tex'))
-
     e = None
     try:
-        if dbgLatex:
-            print "latex first pass"
-            e = oneRunLatex(docname)
-            print "bibtex"
-            e = oneRunBibtex(docname)
-            print "latex second pass"
-            e = oneRunLatex(docname)
-            print "latex third pass"
-            e = oneRunLatex(docname)
+        print "latex first pass"
+        e = oneRunLatex(docname)
+        print "bibtex"
+        e = oneRunBibtex(docname)
+        print "latex second pass"
+        e = oneRunLatex(docname)
+        print "latex third pass"
+        e = oneRunLatex(docname)
 
     except Exception as e:
         print e
@@ -652,13 +645,16 @@ def processDocument(docname,
     # check against fingerpint
     newfingerprint = path_checksum.path_checksum(
         [os.path.join(docname, 'md')])
-
     print "fingerprints: ", fingerprint, newfingerprint
-    if (latexFlag and (not fingerprint == newfingerprint)):
-        e = processLatex(docname)
+
+    # which latexing actions do we have to perform? 
+    e = None
+    if (not fingerprint == newfingerprint):
+        preProcessLatex(os.path.join(docname, 'tex'))
+        if latexFlag:
+            e = processLatex(docname)
     else:
         print "nothing to be done in ", docname
-        e = None
 
     return e, newfingerprint
 
