@@ -26,7 +26,6 @@ from bibtexHandler import processBibtex
 import wikiBib
 
 # debugging flags:
-dbgDownload = True
 dbgLatex = True
 dbgUML = True
 
@@ -69,13 +68,12 @@ def linesFromBulletlist(t):
 
 
 def download(target, output, category=None):
-    if dbgDownload:
-        try:
-            wiki.download(target=target,
-                          output=output,
-                          category=category)
-        except:
-            pass
+    try:
+        wiki.download(target=target,
+                      output=output,
+                      category=category)
+    except:
+        pass
 
 
 def processUML(doc, directory):
