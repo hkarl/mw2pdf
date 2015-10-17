@@ -212,7 +212,7 @@ def processPandoc(doc, directory):
     assert output == ""
 
 
-def processFile(doc, directory):
+def processFile(doc, directory, umlFlag):
     """process file doc in directory. Currently defined processing steps:
     - check whether it is a raw file, then just copy it and do nothing else
     - extract all included umls and run them thorugh plant uml
@@ -220,7 +220,8 @@ def processFile(doc, directory):
     """
 
     if not processRawFile(doc, directory):
-        processUML(doc, directory)
+        if umlFlag:
+            processUML(doc, directory)
         processPandoc(doc, directory)
 
 
@@ -481,7 +482,8 @@ def getSection(text, section):
 def processDocument(docname,
                     fingerprint,
                     downloadFlag,
-                    latexFlag):
+                    latexFlag,
+                    umlFlag):
     global bibtexkeys
 
     print "========================================"
@@ -535,7 +537,8 @@ def processDocument(docname,
             f.write(l)
 
     processFile('propertiesAbstract',
-                os.path.join(docname, 'md'))
+                os.path.join(docname, 'md'),
+                umlFlag)
             
     # -------------------------------------------
     # handle bibtex entries
@@ -673,7 +676,7 @@ def setup_cli_parser():
                         dest="download",
                         default=False,
                         action="store_true",
-                        help="Download from the given wiki",
+                        help="Download from the given wiki (default: False)",
                         )
 
     parser.add_argument("--document",
@@ -686,21 +689,35 @@ def setup_cli_parser():
                         dest="latex",
                         default=False,
                         action="store_true",
-                        help="Run LaTeX",
+                        help="Run LaTeX (default: False)",
                         )
 
     parser.add_argument("--upload",
                         dest="upload",
                         default=False,
                         action="store_true",
-                        help="Upload resulting PDF to wiki",
+                        help="Upload resulting PDF to wiki (default: False)",
                         )
 
     parser.add_argument("--ignore-fingerprint",
                         dest="ignoreFingerprint",
                         default=False,
                         action="store_true",
-                        help="Ignore fingerprint, always process",
+                        help="Ignore fingerprint, always process (default: False)",
+                        )
+
+    parser.add_argument("--uml",
+                        dest="uml",
+                        default=False,
+                        action="store_true",
+                        help="Run the plantuml conversion script  (default: False)"
+                        )
+
+    parser.add_argument("-p",
+                        dest="production",
+                        default=False,
+                        action="store_true",
+                        help="Set all switches to values for a production run."
                         )
     
     return parser
@@ -761,7 +778,8 @@ def main(args):
                                     if not args.ignoreFingerprint
                                     else None),
                                    args.download,
-                                   args.latex)
+                                   args.latex,
+                                   args.uml)
 
         if ((not fingerprints[line] == newfp) or
             (args.ignoreFingerprint)):
@@ -777,5 +795,13 @@ def main(args):
 if __name__ == '__main__':
     parser = setup_cli_parser()
     args = parser.parse_args()
-    
+
+    if args.production:
+        args.download = True
+        args.document = None
+        args.latex = True
+        args.upload = True
+        args.ignoreFingerprint = False
+        args.uml = True
+        
     main(args)
