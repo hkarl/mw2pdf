@@ -265,9 +265,9 @@ def prepareDirectory(docname, filelist, properties, rawlatex):
               'w') as includer:
 
         if rawlatex:
-            includer.write('\\include{rawtex}\n')
+            includer.write('\\input{rawtex}\n')
         for f in filelist:
-            includer.write('\\include{' + f + '}\n')
+            includer.write('\\input{' + f + '}\n')
 
 
 def processCiteKeys(doc):
