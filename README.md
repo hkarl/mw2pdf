@@ -51,5 +51,14 @@ per document
 
 * plantuml jar file is included here, but look for a more up-to-date
 version
-* python modules needed: mwclient, pypandoc, pandocfilters
+* python modules needed (see requirements.txt): mwclient, pypandoc, pandocfilters
 * installation: python, java, pandoc
+* So basically:
+** git clone mw2pdf
+** think about whether you want a virtualenv; if so, set it up and
+activiate it
+** pip install -r requirements.txt
+** python build.py -h
+
+Should not take longer than five minutes if you are roughly familiar
+working with a python environment. 
