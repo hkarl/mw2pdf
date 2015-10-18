@@ -26,8 +26,13 @@ from bibtexHandler import processBibtex
 import wikiBib
 
 
+
+import section
+
+
 # global variables
 bibtexkeys = []     # ugly hack to make this global :-/
+
 
 def ensure_dir(path):
     try:
@@ -35,33 +40,6 @@ def ensure_dir(path):
     except OSError:
         if not os.path.isdir(path):
             raise
-
-
-def linesFromBulletlist(t):
-    """Assume t is a mediawiki bullet list produced by readlines,
-    one item per line.
-    Return a list of the items, without the bullet syntax.
-    """
-    r = [re.sub(' *\* *', '', x, count=1)
-         for x in t
-         if re.match(' *\* *', x)]
-
-    # get the content of the link:
-    match = [re.search('\[\[ *(.*?) *\]\]', x) for x in r]
-
-    r = [(m.group(1) if m else x.strip())
-         for (x, m)
-         in zip(r, match)]
-
-    # remove any possible readable name suffices
-    match = [re.search('(.*?)\|(.*)', x) for x in r]
-
-    r = [(m.group(1) if m else x.strip())
-         for (x, m)
-         in zip(r, match)]
-
-    print r
-    return r
 
 
 def download(target, output, category=None):
@@ -284,7 +262,7 @@ def processCiteKeys(doc):
     global bibtexkeys
 
     # because autoref has the underscores translated to -,
-    # (done by the linkFilter.py filter) 
+    # (done by the linkFilter.py filter)
     # we have to do the same thing here to the bibtexkeys.
 
     newbibkeys = [re.sub('_', '-', x) for x in bibtexkeys]
@@ -307,12 +285,12 @@ def processCiteKeys(doc):
         # because the references get all lower-cased by linkFilter
         # (this is becuase the mediawiki reader lower-cases all the
         # labels for headings, and there is no easy way to distinguish
-        # links to headings from links to references ) 
+        # links to headings from links to references )
         o = '\\cite{' + orgkey.lower() + '}'
         w = '\\cite{' + wrongkey + '}'
 
         doc = doc.replace(w, o)
-    
+
     return doc
 
 
@@ -411,7 +389,7 @@ def preProcessLatex(docdir):
 def processLatex(docname):
 
     def oneRunLatex(docname):
-        e = None 
+        e = None
         try:
             subprocess.check_output(
                 ['pdflatex',
@@ -428,7 +406,7 @@ def processLatex(docname):
         return e
 
     def oneRunBibtex(docname):
-        e = None 
+        e = None
         try:
             subprocess.check_output(
                 ['bibtex',
@@ -460,22 +438,6 @@ def processLatex(docname):
     return e
 
 
-def getSection(text, section):
-    """Assume text is a mediawiki formatted text.
-    Assume it has L1 headings.
-    Obtain the L1 heading with section as title
-    """
-
-    print "getSection: ", text, section
-    m = re.search('= *' + section + ' *=([^=]*)',
-                  text, re.S)
-
-    if m:
-        blocktext = m.group(1).strip()
-        return blocktext.split('\n')
-    else:
-        return None
-
 
 def processDocument(docname,
                     fingerprint,
@@ -499,11 +461,12 @@ def processDocument(docname,
         if os.path.exists(os.path.join(docname, 'md')):
             shutil.rmtree(os.path.join(docname, 'md'))
 
-            
     ensure_dir(os.path.join(docname, 'figures'))
     ensure_dir(os.path.join(docname, 'uml'))
     ensure_dir(os.path.join(docname, 'md'))
     ensure_dir(os.path.join(docname, 'tex'))
+    bibdir = os.path.join(docname, 'bib')
+    ensure_dir(bibdir)
 
     filelist = []
 
@@ -514,36 +477,29 @@ def processDocument(docname,
 
         doclines = doc.read()
 
-    doctoc = getSection(doclines, 'TOC')
-    docprop = getSection(doclines, 'Properties')
-    doclatex = getSection(doclines, 'Latex')
-    docbibtex = getSection(doclines, 'Bibtex')
-    docabstract = getSection(doclines, 'Abstract')
-    docwikibib = getSection(doclines, 'Wikibib')
-    
+    # doctoc = section.getSectionLines(doclines, 'TOC')
+    # docprop = section.getSectionLines(doclines, 'Properties')
+    doclatex = section.getSectionLines(doclines, 'Latex')
+    # docbibtex = section.getSectionLines(doclines, 'Bibtex')
+    # docwikibib = section.getSectionLines(doclines, 'Wikibib')
+
     # --------------------------------------------
     # handle abstract, ensure there is always a possibly empty file
 
-    abstractFname = os.path.join(docname,
-                                 'md',
-                                 'propertiesAbstract.md')
-    if not docabstract:
-        docabstract = [' ']
-
-    with open(abstractFname, 'w') as f:
-        for l in docabstract:
-            f.write(l + "\n")
+    section.writeSectionContent(
+        doclines, 'Abstract',
+        os.path.join(docname,
+                     'md',
+                     'propertiesAbstract.md'))
 
     processFile('propertiesAbstract',
                 os.path.join(docname, 'md'),
                 umlFlag)
-            
+
     # -------------------------------------------
     # handle bibtex entries
 
     bibtex = ""
-    bibdir = os.path.join(docname, 'bib')
-    ensure_dir(bibdir)
     # there should always be an even empty bib.bib in tex folder
     with open(os.path.join(docname,
                            'tex', "bib.bib"),
@@ -551,74 +507,43 @@ def processDocument(docname,
         bh.write('% empty bibtex file\n')
     bibtexkeys = []
 
-    if docbibtex:
-        # download all the bibfiles:
-        for doc in linesFromBulletlist(docbibtex):
-            doc = doc.strip()
-            if doc:
-                # add seaprate case to deal with mendeley group
-                try:
-                    download(target=doc,
-                             output=bibdir)
-                except:
-                    pass
+    for f in section.downloadSectionFiles(doclines,
+                                          'Bibtex',
+                                          bibdir,
+                                          downloadFlag):
+        print "bibtex: ", f
+        with open(os.path.join(bibdir, f+'.md'), 'r') as fh:
+            bibtex += fh.read()
+    bibtexkeys = processBibtex(docname, bibtex)
 
-        # collect them together and postprocess
-        for f in glob.glob(os.path.join(bibdir, '*')):
-            with open (f, 'r') as fh:
-                bibtex += fh.read()
-
-        bibtexkeys = processBibtex(docname, bibtex)
-
-    if docwikibib:
-        for doc in linesFromBulletlist(docwikibib):
-            doc = doc.strip()
-            if doc:
-                # add seaprate case to deal with mendeley group
-                try:
-                    download(target=doc,
-                             output=bibdir)
-                except:
-                    pass
-
-                bibtexkeys += wikiBib.wikibib(infile=os.path.join(bibdir,
-                                                                  doc + '.md'),
-                                              outfile=os.path.join(docname,
-                                                                   'tex',
-                                                                   'bib.bib'))
+    for doc in section.downloadSectionFiles(doclines,
+                                            'Wikibib',
+                                            bibdir,
+                                            downloadFlag):
+        bibtexkeys += wikiBib.wikibib(infile=os.path.join(bibdir,
+                                                          doc + '.md'),
+                                      outfile=os.path.join(docname,
+                                                           'tex',
+                                                           'bib.bib'))
 
     print "bibtexkeys (2):", bibtexkeys
 
     #--------------------------------------------------
     # process the toc: which files to download, include?
-    if doctoc:
-        for doc in linesFromBulletlist(doctoc):
-            doc = doc.strip()
-            if doc:
-                print "processing: >>", doc, "<<"
-                mddir = os.path.join(docname, 'md')
-                try:
-                    download(target=doc,
-                             output=mddir)
+    mddir = os.path.join(docname, 'md')
+    filelist = section.downloadSectionFiles(doclines,
+                                            'TOC',
+                                            mddir,
+                                            downloadFlag)
+    for doc in filelist:
+        print "processing: >>", doc
+        processFile(doc, mddir, umlFlag)
 
-                    # process each document separately
-                    processFile(doc, mddir)
-                    filelist.append(doc)
-                except:
-                    pass
 
     #=============================================
     # process any additional properties:
-    if docprop:
-        tmp = linesFromBulletlist(docprop)
-        tmp = [x.split(':') for x in tmp]
-        tmp = filter(lambda x: len(x) == 2, tmp)
 
-        properties = [(k.strip(), v.strip())
-                      for (k, v) in tmp]
-        print properties
-    else:
-        properties = None
+    properties = section.getProperties(doclines, 'Properties')
 
     #=============================================
     # copy figures to figures directory, fix spaces in file name!
@@ -640,6 +565,8 @@ def processDocument(docname,
 
     print figurefiles
 
+    #===========================================
+    # start the actual processing
     # prepare directory
     prepareDirectory(docname, filelist, properties, doclatex)
 
@@ -648,7 +575,7 @@ def processDocument(docname,
         [os.path.join(docname, 'md')])
     print "fingerprints: ", fingerprint, newfingerprint
 
-    # which latexing actions do we have to perform? 
+    # which latexing actions do we have to perform?
     e = None
     if (not fingerprint == newfingerprint):
         preProcessLatex(os.path.join(docname, 'tex'))
@@ -664,7 +591,7 @@ def processDocument(docname,
 
 def setup_cli_parser():
     """
-    Command-line switches, mostly to help with debugging. 
+    Command-line switches, mostly to help with debugging.
     """
 
     parser=argparse.ArgumentParser(
@@ -717,35 +644,36 @@ def setup_cli_parser():
                         action="store_true",
                         help="Set all switches to values for a production run."
                         )
-    
+
     return parser
 
 
-def get_documentlist(document, download):
-    """Determine documents to process. 
-    Command-line args takes precedence over anything 
+def get_documentlist(document, downloadFlag):
+    """Determine documents to process.
+    Command-line args takes precedence over anything
     that could be downloaded.
     """
+
     if document:
         return [document]
 
     documentlist = []
-    if download:
+    if downloadFlag:
         # start the download
         print "downloading documentlist"
         download(target=config.DOCUMENTLIST,
                  output="DocumentList")
 
-        # process the downloaded documentlist: 
+        # process the downloaded documentlist:
         fname = os.path.join('DocumentList',
                              config.DOCUMENTLIST + '.md')
         with open(fname,
                   'r') as f:
-            documentlist = linesFromBulletlist(f.readlines())
+            documentlist = section.linesFromBulletlist(f.readlines())
 
     return documentlist
-    
-    
+
+
 def main(args):
 
     # initialize wiki connection
@@ -783,7 +711,7 @@ def main(args):
             (args.ignoreFingerprint)):
             if args.upload:
                 wiki.upload_document(line, e)
-                
+
         fingerprints[line] = newfp
 
     with open('fingerprints', 'w') as fp:
@@ -791,6 +719,7 @@ def main(args):
 
 
 if __name__ == '__main__':
+
     parser = setup_cli_parser()
     args = parser.parse_args()
 
@@ -801,5 +730,5 @@ if __name__ == '__main__':
         args.upload = True
         args.ignoreFingerprint = False
         args.uml = True
-        
+
     main(args)
