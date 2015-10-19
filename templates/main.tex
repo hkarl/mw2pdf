@@ -127,40 +127,94 @@ areasetadvanced]{scrreprt}
 
 % \frontmatter
 % \vspace*{5mm}
-\noindent \formSection{Document Properties} \frontpageTitleSep \\
-\begin{tabularx}{\textwidth}[l]{p{50mm}X}
-	\hline
-	\formLabel{Document Number:}		& \docNumber \\ \hline
-	\formLabel{Document Title:}		& {\bfseries \sffamily \vspace*{1mm} \docTitle \vspace*{3mm}} \\ \hline
-	\formLabel{Document Responsible:}	& \docResponsible \\ \hline
-	\formLabel{Document Editor:}	& \docEditors \\ \hline
-	\formLabel{Authors:}			& \docAuthors \\ \hline
-	\formLabel{Target Dissemination Level:}	& \docTargetDissLevel \\ \hline
-	\formLabel{Status of the Document:}	& \docStatus \\ \hline
-	\formLabel{Version:}			& \docVersion \\
-	\hline
+\thispagestyle{empty}
+\begin{center}
+  \includegraphics[width=0.5\textwidth]{sonata-logo-large}
+\frontpageTitleSep \\
+\frontpageSectionSep \\
+\begin{tabularx}{0.8\linewidth}[l]{p{0.8\linewidth}}
+\hline 
+~\\
+{  \bfseries \Large \docNumber{}  \docTitle }
+~\\
+\hline 
+\end{tabularx}
+\end{center}
+
+
+% \noindent \formSection{Document Properties} 
+\frontpageTitleSep \\
+\frontpageSectionSep \\
+\noindent \begin{tabularx}{\textwidth}[l]{p{25mm}X}
+  \hline
+  \formLabel{Project Acronym} & SONATA  \\
+  \formLabel{Project Title } & Service Programing and Orchestration for Virtualized Software Networks  \\
+  \formLabel{Project Number} & 671517 (co-funded by the European Commission through Horizon 2020) \\
+  \formLabel{Instrument} & Collaborative Innovation Action \\
+  \formLabel{Start Date} & 01/07/2015 \\
+  \formLabel{Duration} & 30 months \\
+  \formLabel{Thematic Priority } & ICT-14-2014 Advanced 5G Network Infrastructure for the Future Internet \\
+  \hline
 \end{tabularx}
 
-\frontpageSectionSep
+\frontpageSectionSep 
 
-\noindent \formSection{Production Properties:} \frontpageTitleSep \\
-\begin{tabularx}{\textwidth}[l]{p{50mm}X}
- 	\hline
- 	\formLabel{Reviewers:} & \docReviewed \\
- 	\hline
+% \noindent \formSection{Production Properties:}
+%  \frontpageTitleSep \\
+
+\noindent \begin{tabularx}{\textwidth}[l]{p{25mm}X}
+            \hline
+            \formLabel{Deliverable} & \docNumber{} \docTitle  \\
+            \formLabel{Workpackage} & \workpackage \\
+            \formLabel{Due Date} & \duedate \\
+            \formLabel{Submission Date} & \submissiondate \\
+            \formLabel{Version} & \docVersion \\
+            \formLabel{Status} & \docStatus \\
+            \formLabel{Editor}	& \docEditors \\ 
+            \formLabel{Contributors}			& \docAuthors \\ 
+            \formLabel{Reviewer(s)} & \docReviewed \\
+            \hline
+          \end{tabularx}
+
+\frontpageSectionSep 
+\frontpageSectionSep 
+
+\noindent \formSection{Keywords:} 
+\frontpageTitleSep \\
+\noindent \begin{tabularx}{\textwidth}{X} 
+\hline
+\small 
+\docKeywords 
+\\
+\hline
 \end{tabularx}
+
+\newpage
  
-\frontpageSectionSep
+\frontpageSectionSep 
+\frontpageSectionSep 
 
-% \noindent \formSection{Document History:}
-% \frontpageTitleSep \\ 
-% \begin{tabularx}{\textwidth}{|X|X|X|X|}
-% \hline
-% \docRevisionHistory
-% \hline 
-% \end{tabularx} 
 
-% \frontpageSectionSep
+
+\noindent \begin{tabularx}{\textwidth}[l]{p{10mm}Xc}
+  \hline
+  \multicolumn{3}{c}{Deliverable Type} \\
+  \hline 
+  R & Document &  \textbf{X} \\
+  DEM & Demonstrator, pilot, prototype &  \\
+  DEC & Websites, patent filings, videos, etc. &  \\
+  OTHER & &  \\
+  \hline 
+  \multicolumn{3}{c}{ Dissemination Level} \\
+  \hline  
+  PU & Public & \textbf{X} \\
+  CO & Confidential, only for members of the consortium (including the
+       Commission Services) \\
+  \hline
+\end{tabularx}
+
+\frontpageSectionSep 
+\frontpageSectionSep 
 
 \noindent \formSection{Disclaimer:} 
 \frontpageTitleSep \\
@@ -177,29 +231,16 @@ For the avoidance of all doubts, the European Commission has no liability in res
 \end{tabularx}
 
 \clearpage
+
+
 \frontpageSectionSep
 
-\noindent \formSection{Abstract:} 
-\frontpageTitleSep \\
-\begin{tabularx}{\textwidth}{X}
-\hline
-%\small
+\section*{Executive Summary:} 
+
+
 \input{propertiesAbstract}
-\\
-\hline
-\end{tabularx}
 
-\frontpageSectionSep
 
-\noindent \formSection{Keywords:} 
-\frontpageTitleSep \\
-\begin{tabularx}{\textwidth}{X} 
-\hline
-\small 
-\docKeywords 
-\\
-\hline
-\end{tabularx}
 
 %----------------------------------------------------------------
 

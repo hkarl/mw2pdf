@@ -212,6 +212,9 @@ def prepareDirectory(docname, filelist, properties, rawlatex):
     shutil.copy('templates/logo.jpg',
                 os.path.join(docname,
                              'tex'))
+    shutil.copy('templates/sonata-logo-large.png',
+                os.path.join(docname,
+                             'tex'))
 
     # prepare the additional properties:
     print "writing properties"
