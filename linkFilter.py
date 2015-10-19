@@ -45,6 +45,20 @@ def linkhandler(key, value, frmt, meta):
                 link = '-'.join([x.lower() for x in link.split('_')])
                 return RawInline('latex', "\\autoref{{{}}}".format(link))
 
+    elif key == 'RawInline': 
+        sys.stderr.write(
+            'Key: {} Type of Key: {} \nValue: {}\nfrmt: {} \nmeta: {}\n-------\n'
+            .format(
+                key, type(key),
+                value, frmt, meta))
+
+        if frmt == 'latex':
+            kind, val = value
+
+            if kind == 'html':
+
+                if val == '<newpage>':
+                    return RawInline('latex', '\\newpage')
 
 if __name__ == "__main__":
     toJSONFilter(linkhandler)
