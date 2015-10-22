@@ -24,11 +24,19 @@ def processBibtex(docname, bibtex):
     - list of bibtex keys
     """
 
+    print "trying to pare bibtex file"
+
     # remove any wiki anchors, as defined in
     # https://meta.wikimedia.org/wiki/Help:Anchors
 
     bibtex = re.sub('<( *)div(.*?)>', '', bibtex, re.S)
     bibtex = re.sub('<( *)/( *)div(.*?)>', '', bibtex, re.S)
+    bibtex = re.sub('<( *)div(.*?) */? *> *', '', bibtex)
+
+    print "bibtex after removing divs, three stages: ", bibtex
+
+    with open(os.path.join(docname, 'tex', 'debug.bib'), 'w') as tmpfh:
+        tmpfh.write(bibtex)
 
     # sanitize via bibtex library
     parser = bibtexparser.bparser.BibTexParser()
