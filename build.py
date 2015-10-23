@@ -18,6 +18,7 @@ from pprint import pprint as pp
 from collections import defaultdict
 import itertools
 import argparse
+import tarfile
 
 import wikiconnector as wiki
 import path_checksum
@@ -710,10 +711,20 @@ def main(args):
                                    args.latex,
                                    args.uml)
 
+
         if ((not fingerprints[line] == newfp) or
             (args.ignoreFingerprint)):
             if args.upload:
+                # produce tarfile of the produced latex and figure documents
+                with tarfile.open(os.path.join(line, line+'-latex.tgz'),
+                                  'w:gz') as tar:
+                    tar.add(os.path.join(line, 'tex'))
+                    tar.add(os.path.join(line, 'figures'))
+                    tar.add(os.path.join(line, 'bib'))
+                    tar.add(os.path.join(line, 'uml'))
+
                 wiki.upload_document(line, e)
+
 
         fingerprints[line] = newfp
 

@@ -143,6 +143,19 @@ def upload_document(doc, excp):
     else:
         print "no pdf to upload"
 
+    # any tar file to upload?
+    tarfile = os.path.join(doc, doc+'-latex.tgz')
+    if os.path.isfile(tarfile):
+        uploadName = doc+'-latex.tgz'
+        print "tar file exsists, upload: ", tarfile, uploadName
+        res = SITE.upload(open(tarfile),
+                          uploadName,
+                          "Generated intermediate files (figures, uml, latex) for " + doc,
+                          ignore=True)
+        pp(res)
+    else:
+        print "no tar file to upload"
+    
     # prepare the build report page
     page = SITE.Pages[doc + 'BuildReport']
     text = page.text()
