@@ -456,8 +456,14 @@ def processDocument(docname,
     print "processing document: ", docname
 
     if downloadFlag:
+        # note: we never download embedded elements from control page
+        # as this might point to producedd PDF or tar files.
+        # we do that in more fine-grained manner below
         download(target=docname,
-                 output=docname, embedded_elements=embeddedElemetsFlag)
+                 output=docname,
+                 #embedded_elements=embeddedElemetsFlag,
+                 embedded_elements=False,
+        )
 
         # make sure that at least md subdirectory is empty
         # later on, might remove all other stuff as well
