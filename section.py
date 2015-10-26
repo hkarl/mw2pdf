@@ -75,7 +75,7 @@ def writeSectionContent(text, section,
     return content
 
 
-def downloadSectionFiles(text, section, dirname, downloadFlag):
+def downloadSectionFiles(text, section, dirname, downloadFlag, embeddedElemetsFlag):
     """download all files mentioned
     in the given section as a bullet list.
     download them to dirname.
@@ -96,7 +96,8 @@ def downloadSectionFiles(text, section, dirname, downloadFlag):
                 try:
                     wikiconnector.download(
                         target=tmp,
-                        output=dirname)
+                        output=dirname,
+                        embedded_elements=embeddedElemetsFlag)
 
                     r.append(f)
                 except:

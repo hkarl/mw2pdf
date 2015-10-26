@@ -45,7 +45,7 @@ def no_archived_elements(img_list):
     return [i for i in img_list if 'archive' not in i.imageinfo['url']]
 
 
-def fetch_wiki_page(site, page, out=None):
+def fetch_wiki_page(site, page, out=None, embedded_elements=True):
     """
     Arguments:
     - site : mwclient site object
@@ -68,23 +68,24 @@ def fetch_wiki_page(site, page, out=None):
 
     # fetch all images used in page
     # TODO: Filter? This will download all linked files (e.g. PDFs)
-    print "Fetching page's images"
-    download_ps = []
-    for img in no_archived_elements(page.images()):
-        p = subprocess.Popen(
-            ["wget", "-xNq",
-             "-O%s%s" % (out, img.name.replace("File:", "")),
-             img.imageinfo['url']
-             ])
-        download_ps.append(p)
-        print "Downloading: %s" % img.name
-    print "Waiting for all downloads to finish..."
-    ecodes = [p.wait() for p in download_ps]
-    if 1 in ecodes:
-        print "*** WARNING: File download failed. ***"
+    if embedded_elements:
+        print "Fetching page's embedded elements"
+        download_ps = []
+        for img in no_archived_elements(page.images()):
+            p = subprocess.Popen(
+                ["wget", "-xNq",
+                 "-O%s%s" % (out, img.name.replace("File:", "")),
+                 img.imageinfo['url']
+                 ])
+            download_ps.append(p)
+            print "Downloading: %s" % img.name
+        print "Waiting for all downloads to finish..."
+        ecodes = [p.wait() for p in download_ps]
+        if 1 in ecodes:
+            print "*** WARNING: File download failed. ***"
 
 
-def fetch_wiki_category(site, catname, out=None):
+def fetch_wiki_category(site, catname, out=None, embedded_elements=True):
     """
     Fetches all pages contained in the given
     category.
@@ -94,7 +95,7 @@ def fetch_wiki_category(site, catname, out=None):
     out = ("%s/" % catname) if out is None else out
     # fetch all pages found in category
     for page in site.Categories[catname]:
-        fetch_wiki_page(site, page, out)
+        fetch_wiki_page(site, page, out, embedded_elements=embedded_elements)
 
 
 def ensure_dir(directory):
@@ -106,16 +107,16 @@ def ensure_dir(directory):
 
 
 def download(target,
-             output="out/", category=None, **kwargs):
+             output="out/", category=None, embedded_elements=True, **kwargs):
     global SITE
     if SITE is None:
         raise Exception("Wiki connection was not initialized.")
     if not output[-1] == '/':
         output += '/'
     if category:
-        fetch_wiki_category(SITE, target, output)
+        fetch_wiki_category(SITE, target, output, embedded_elements=embedded_elements)
     else:
-        fetch_wiki_page(SITE, target, output)
+        fetch_wiki_page(SITE, target, output, embedded_elements=embedded_elements)
 
 
 def upload_document(doc, excp):

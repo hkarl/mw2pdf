@@ -43,11 +43,12 @@ def ensure_dir(path):
             raise
 
 
-def download(target, output, category=None):
+def download(target, output, category=None, embedded_elements=True):
     try:
         wiki.download(target=target,
                       output=output,
-                      category=category)
+                      category=category,
+                      embedded_elements=embedded_elements)
     except:
         pass
 
@@ -447,7 +448,8 @@ def processDocument(docname,
                     fingerprint,
                     downloadFlag,
                     latexFlag,
-                    umlFlag):
+                    umlFlag,
+                    embeddedElemetsFlag):
     global bibtexkeys
 
     print "========================================"
@@ -455,7 +457,7 @@ def processDocument(docname,
 
     if downloadFlag:
         download(target=docname,
-                 output=docname)
+                 output=docname, embedded_elements=embeddedElemetsFlag)
 
         # make sure that at least md subdirectory is empty
         # later on, might remove all other stuff as well
@@ -514,7 +516,8 @@ def processDocument(docname,
     for f in section.downloadSectionFiles(doclines,
                                           'Bibtex',
                                           bibdir,
-                                          downloadFlag):
+                                          downloadFlag,
+                                          embeddedElemetsFlag):
         print "bibtex: ", f
         with open(os.path.join(bibdir, f+'.md'), 'r') as fh:
             bibtex += fh.read()
@@ -523,7 +526,8 @@ def processDocument(docname,
     for doc in section.downloadSectionFiles(doclines,
                                             'Wikibib',
                                             bibdir,
-                                            downloadFlag):
+                                            downloadFlag,
+                                            embeddedElemetsFlag):
         bibtexkeys += wikiBib.wikibib(infile=os.path.join(bibdir,
                                                           doc + '.md'),
                                       outfile=os.path.join(docname,
@@ -538,7 +542,8 @@ def processDocument(docname,
     filelist = section.downloadSectionFiles(doclines,
                                             'TOC',
                                             mddir,
-                                            downloadFlag)
+                                            downloadFlag,
+                                            embeddedElemetsFlag)
     for doc in filelist:
         print "processing: >>", doc
         processFile(doc, mddir, umlFlag)
@@ -649,10 +654,17 @@ def setup_cli_parser():
                         help="Set all switches to values for a production run."
                         )
 
+    parser.add_argument("--no-elements",
+                        dest="noEmbeddedElements",
+                        default=False,
+                        action="store_true",
+                        help="Do not download embedded elements (e.g. images from wiki pages) (default: False)",
+                        )
+
     return parser
 
 
-def get_documentlist(document, downloadFlag):
+def get_documentlist(document, downloadFlag, embeddedElemetsFlag):
     """Determine documents to process.
     Command-line args takes precedence over anything
     that could be downloaded.
@@ -666,7 +678,7 @@ def get_documentlist(document, downloadFlag):
         # start the download
         print "downloading documentlist"
         download(target=config.DOCUMENTLIST,
-                 output="DocumentList")
+                 output="DocumentList", embedded_elements=embeddedElemetsFlag)
 
         # process the downloaded documentlist:
         fname = os.path.join('DocumentList',
@@ -699,7 +711,8 @@ def main(args):
 
     # iterate over the documents contained in documentlist:
     for line in get_documentlist(args.document,
-                                 args.download):
+                                 args.download,
+                                 not args.noEmbeddedElements):
 
         # if we are to ignore fingerprints, let's just pass in a stupid
         # value:
@@ -709,7 +722,8 @@ def main(args):
                                     else None),
                                    args.download,
                                    args.latex,
-                                   args.uml)
+                                   args.uml,
+                                   not args.noEmbeddedElements)
 
 
         if ((not fingerprints[line] == newfp) or
@@ -744,5 +758,6 @@ if __name__ == '__main__':
         args.upload = True
         args.ignoreFingerprint = False
         args.uml = True
+        args.noEmbeddedElements = False
 
     main(args)
