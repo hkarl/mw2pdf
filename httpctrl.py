@@ -42,5 +42,5 @@ def build():
     return "Started build process for <b>%s</b>. Updated document will be available (uploaded to the Wiki) in some minutes." % str(docname)
 
 if __name__ == "__main__":
-    app.debug = True
+    app.debug = False
     app.run(host='0.0.0.0')
