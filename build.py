@@ -203,7 +203,8 @@ def processFile(doc, directory, umlFlag):
         processPandoc(doc, directory)
 
 
-def prepareDirectory(docname, filelist, properties, rawlatex):
+def prepareDirectory(docname, filelist, appendixlist,
+                     properties, rawlatex):
     # put the latex main document into the directory
     shutil.copy('templates/main.tex',
                 os.path.join(docname,
@@ -251,6 +252,19 @@ def prepareDirectory(docname, filelist, properties, rawlatex):
             includer.write('\\input{rawtex}\n')
         for f in filelist:
             includer.write('\\input{' + f + '}\n')
+
+    # write the appendixlist:
+    with open(os.path.join(docname,
+                           'tex',
+                           'appendixlist.tex'),
+              'w') as appendixfile:
+
+        appendixfile.write('% appendix\n\n')
+
+        print "appendix: ", appendixlist, filelist
+
+        for f in appendixlist:
+            appendixfile.write('\\input{' + f + '}\n')
 
 
 def processCiteKeys(doc):
@@ -554,6 +568,16 @@ def processDocument(docname,
         print "processing: >>", doc
         processFile(doc, mddir, umlFlag)
 
+    # similar for possible appendices:
+    appendixlist = section.downloadSectionFiles(doclines,
+                                                'Appendix',
+                                                mddir,
+                                                downloadFlag,
+                                                embeddedElemetsFlag)
+    for doc in appendixlist:
+        print "processing: >>", doc
+        processFile(doc, mddir, umlFlag)
+
 
     #=============================================
     # process any additional properties:
@@ -583,7 +607,7 @@ def processDocument(docname,
     #===========================================
     # start the actual processing
     # prepare directory
-    prepareDirectory(docname, filelist, properties, doclatex)
+    prepareDirectory(docname, filelist, appendixlist, properties, doclatex)
 
     # check against fingerpint
     newfingerprint = path_checksum.path_checksum(
