@@ -12,10 +12,12 @@ def linesFromBulletlist(t):
     one item per line.
     Return a list of the items, without the bullet syntax.
     """
-    r = [re.sub(' *\* *', '', x, count=1)
+    regexp = " *(\*|#)+ *"
+    r = [re.sub(regexp, '', x, count=1)
          for x in t
-         if re.match(' *\* *', x)]
+         if re.match(regexp, x)]
 
+    print 'lFB 1: ', t, '\n', r
     # get the content of the link:
     match = [re.search('\[\[ *(.*?) *\]\]', x) for x in r]
 
@@ -30,7 +32,7 @@ def linesFromBulletlist(t):
          for (x, m)
          in zip(r, match)]
 
-    print r
+    print 'lFB final: ', r
     return r
 
 #------------------------------------------
