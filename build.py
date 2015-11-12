@@ -285,7 +285,7 @@ def processCiteKeys(doc):
     # we have to do the same thing here to the bibtexkeys.
 
     newbibkeys = [re.sub('_', '-', x) for x in bibtexkeys]
-    print "bibtexkeys: ", newbibkeys
+    # print "bibtexkeys: ", newbibkeys
 
     pattern = 'autoref{(' + '|'.join(newbibkeys) + ')}'
     doc = re.sub(pattern, 'cite{\\1}', doc)
@@ -298,7 +298,7 @@ def processCiteKeys(doc):
     deltaKeys = [(x, y)
                  for (x, y) in zip(bibtexkeys, newbibkeys)
                  if not x == y]
-    print "delatakeys: ", deltaKeys
+    # print "delatakeys: ", deltaKeys
     for orgkey, wrongkey in deltaKeys:
         # we need to lower-case the citation key for the bib file
         # because the references get all lower-cased by linkFilter
@@ -312,6 +312,24 @@ def processCiteKeys(doc):
 
     return doc
 
+
+def insertFilenameLabel(doc, filename):
+
+    print "inserting: ", filename
+    # get basename, remove extension
+
+    f = os.path.basename(filename)
+    f = os.path.splitext(f)[0]
+    f = re.sub('_', '-', f)
+    f = f.lower()
+
+    tmp = re.sub(
+        "((subsubsection|subsection|section|chapter|paragraph|subparagraph){.*?})",
+        "\\1\\label{" + f + "}", doc,
+        count=1,
+        flags=re.DOTALL)
+
+    return tmp
 
 def preProcessLatex(docdir):
     """Because of limitations in pondoc's mediawiki parser
@@ -400,6 +418,8 @@ def preProcessLatex(docdir):
         # handle cites
         doc = processCiteKeys(doc)
 
+        # insert a label with the file name after the first section
+        doc = insertFilenameLabel(doc, f)
 
         with open(f, 'w')  as fhandle:
             fhandle.write(doc)
