@@ -76,15 +76,6 @@ def processUML(doc, directory):
     i = 1
     m = re.search("<uml>(.*?)</uml>", data, re.S)
     while (m):
-        umlfile = doc + "_" + str(i)
-        with open(os.path.join(umldir,
-                               umlfile + '.uml'),
-                  'w') as umlhandle:
-
-            umlhandle.write("@startuml")
-            umlhandle.write(m.group(1))
-            umlhandle.write("@enduml")
-
         # try to extract the title, to use for the caption:
         title_match = re.search("^title (.*)$",
                                 m.group(1),
@@ -93,6 +84,20 @@ def processUML(doc, directory):
             title_text = title_match.group(1)
         else:
             title_text = "UML figure (no caption provided)"
+
+        # remove title_text from contents written to UML file
+        # (we only want Latex figure captions)
+        umlcontent = str(m.group(1)).replace("title " + title_text, "")
+
+        # write uml to file for further processing by plantUML
+        umlfile = doc + "_" + str(i)
+        with open(os.path.join(umldir,
+                               umlfile + '.uml'),
+                  'w') as umlhandle:
+
+            umlhandle.write("@startuml")
+            umlhandle.write(umlcontent)
+            umlhandle.write("@enduml")
 
         if True:
             # trigger the generation of the actual UML figure
