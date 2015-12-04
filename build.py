@@ -611,7 +611,7 @@ def processDocument(docname,
 
     #=============================================
     # copy figures to figures directory, fix spaces in file name!
-    figextensions = ['png', 'jpg', 'jpeg', 'eps', 'pdf']
+    figextensions = ['png', 'jpg', 'jpeg', 'eps', 'pdf', 'PNG', 'JPG', 'JPEG', 'EPS', 'PDF']
     figurefiles = list(itertools.chain.from_iterable(
         [glob.glob(os.path.join(docname,
                                 'md',
