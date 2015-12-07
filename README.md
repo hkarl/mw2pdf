@@ -1,4 +1,6 @@
 # mw2pdf
+
+[![Join the chat at https://gitter.im/hkarl/mw2pdf](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/hkarl/mw2pdf?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Convert Mediawiki to PDF via pandoc and latex, including UML conversion 
 
 ## Purpose
