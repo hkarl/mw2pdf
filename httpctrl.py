@@ -14,7 +14,7 @@ def welcome():
 
     <form action="build" method="get">
     Docname:<br>
-    <input type="text" name="docname" = value="D2.1_wikitest">
+    <input type="text" name="docname" = value="WP2_Deliverable_2.2">
     <input type="submit" value="Build!">
     </form>
     """
