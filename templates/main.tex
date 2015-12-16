@@ -21,6 +21,7 @@ areasetadvanced]{scrreprt}
 % Important packages
 \usepackage{ifthen}
 \usepackage{paralist}
+\usepackage{textcomp}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,6 +39,9 @@ areasetadvanced]{scrreprt}
 
 
 \usepackage{hyperref}
+\hypersetup{
+  hidelinks
+}
 \usepackage{url}
 
 
@@ -59,6 +63,14 @@ areasetadvanced]{scrreprt}
 
 % pandoc seems to require memoir, which I dont want to bother with: 
 \newcommand{\tightlist}{}
+
+% Define the names for references
+\def\sectionautorefname{Section}
+\def\subsectionautorefname{Section}
+\def\subsubsectionautorefname{Section}
+\def\subsubsubsectionautorefname{Section}
+\def\chapterautorefname{Chapter}
+\def\figureautorefname{Figure}
 
 \input{documentProperties}
 
@@ -110,7 +122,7 @@ areasetadvanced]{scrreprt}
 \lofoot[\\ SONATA]{\\ SONATA}
 \rofoot[\\ \thepage]{\\ \thepage}
 \lefoot[\\ \thepage]{\\ \thepage}
-\cfoot[{\docSecurity}]{{\docSecurity}}
+\cfoot[{\\ \docSecurity}]{{\\ \docSecurity}}
 
 
 \input{moreProperties}
@@ -130,15 +142,16 @@ areasetadvanced]{scrreprt}
 \thispagestyle{empty}
 \begin{center}
   \includegraphics[width=0.5\textwidth]{sonata-logo-large}
-\frontpageTitleSep 
-\frontpageSectionSep 
-\begin{tabularx}{0.8\linewidth}[l]{p{0.8\linewidth}}
-\hline 
-~\\
-{  \bfseries \Large \docNumber{}  \docTitle }
-~\\
-\hline 
-\end{tabularx}
+  \frontpageTitleSep 
+  \frontpageSectionSep 
+  \vspace*{1mm}
+  \begin{tabularx}{0.8\linewidth}[p]{m{0.8\linewidth}}
+    \hline 
+    ~\\
+    {  \bfseries \Large \docNumber{}  \docTitle }
+    ~\\
+    \hline 
+  \end{tabularx}
 \end{center}
 
 
@@ -207,14 +220,15 @@ areasetadvanced]{scrreprt}
   \hline 
   \multicolumn{3}{c}{ Dissemination Level} \\
   \hline  
-  PU & Public & \textbf{X} \\
+  PU & Public & \\
   CO & Confidential, only for members of the consortium (including the
-       Commission Services) \\
+       Commission Services) & \textbf{X} \\
   \hline
 \end{tabularx}
 
 \frontpageSectionSep 
 \frontpageSectionSep 
+\vfill
 
 \noindent \formSection{Disclaimer:} 
 \frontpageTitleSep \\
@@ -230,7 +244,7 @@ For the avoidance of all doubts, the European Commission has no liability in res
 \hline
 \end{tabularx}
 
-\clearpage
+\cleardoublepage
 
 
 \frontpageSectionSep
@@ -251,14 +265,14 @@ For the avoidance of all doubts, the European Commission has no liability in res
 
 \addcontentsline{toc}{chapter}{List of Figures}
 \listoffigures
-\clearpage
+\cleardoublepage
 
 
 % Comment/uncomment if tables exist
 
 \addcontentsline{toc}{chapter}{List of Tables}
 \listoftables
-\clearpage
+\cleardoublepage
 
 % Command/uncomment if listings or algorithms exist
 
