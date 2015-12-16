@@ -31,7 +31,7 @@ import wikiBib
 import section
 
 
-DEFAULT_FIGURE_WIDTH = 0.9  # n\columnwidth
+DEFAULT_FIGURE_WIDTH = 0.75  # n\textwidth
 
 # global variables
 bibtexkeys = []     # ugly hack to make this global :-/
@@ -406,7 +406,7 @@ def preProcessLatex(docdir):
         # second, lets create labels from the text after a hashmark of a caption:
         doc = re.sub(r'\\includegraphics{(.*?)}\n\\caption{(.*?)(\\#(.*?))(\\#(.*?))?}',
                      # r'\caption{\1}\label{\3}',
-                     lambda m: r'\includegraphics[{3}\columnwidth]{{{0}}}\caption{{{1}}}\label{{{2}}}'.format(
+                     lambda m: r'\includegraphics[width={3}\textwidth]{{{0}}}\caption{{{1}}}\label{{{2}}}'.format(
                          m.group(1),
                          m.group(2),
                          m.group(4).lower(),
