@@ -4,9 +4,17 @@ bibliography=totocnumbered,%
 areasetadvanced]{scrreprt}
 
 
-\setcounter{secnumdepth}{4}
+\setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{2}
 
+% Avoid numbering of paragraphs, ie. only number chapters and sections.
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {-3.25ex \@plus -1ex \@minus -0.2ex}%
+  {3pt}%
+  {\raggedsection\normalfont\sectfont\nobreak\size@paragraph}%
+}
+\makeatother 
 
 \areaset[2,0cm]{16.5cm}{24.5cm}
 \setlength\headheight{42pt}
