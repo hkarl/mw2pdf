@@ -248,16 +248,16 @@ areasetadvanced]{scrreprt}
   \hline
   \multicolumn{3}{c}{Deliverable Type} \\
   \hline 
-  R & Document &  \textbf{X} \\
-  DEM & Demonstrator, pilot, prototype &  \\
-  DEC & Websites, patent filings, videos, etc. &  \\
-  OTHER & &  \\
+  R & Document &  \ifthenelse{\equal{\docType}{R}}{\textbf{X}}{} \\
+  DEM & Demonstrator, pilot, prototype & \ifthenelse{\equal{\docType}{DEM}}{\textbf{X}}{} \\
+  DEC & Websites, patent filings, videos, etc. & \ifthenelse{\equal{\docType}{DEC}}{\textbf{X}}{} \\
+  OTHER & & \ifthenelse{\equal{\docType}{OTHER}}{\textbf{X}}{} \\
   \hline 
   \multicolumn{3}{c}{ Dissemination Level} \\
   \hline  
-  PU & Public & \\
+  PU & Public & \ifthenelse{\equal{\docTargetDissLevel}{PU}}{\textbf{X}}{} \\
   CO & Confidential, only for members of the consortium (including the
-       Commission Services) & \textbf{X} \\
+       Commission Services) & \ifthenelse{\equal{\docTargetDissLevel}{CO}}{\textbf{X}}{} \\
   \hline
 \end{tabularx}
 
