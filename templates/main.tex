@@ -67,7 +67,11 @@ areasetadvanced]{scrreprt}
 \usepackage{tikz}
 \usetikzlibrary{trees}
 
- \usepackage{longtable}
+\usepackage{longtable}
+%%% Lets use smaller fonts inside the tables for the entire document
+\usepackage[font=normalsize]{caption}     %% make caption in normal size
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\footnotesize}{}{}   %% change all longtabu content to foot note size
 
 % pandoc seems to require memoir, which I dont want to bother with: 
 \newcommand{\tightlist}{}

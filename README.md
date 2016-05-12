@@ -64,3 +64,9 @@ activiate it
 
 Should not take longer than five minutes if you are roughly familiar
 working with a python environment. 
+
+
+## Examples 
+* python build.py --download --latex --ignore-fingerprint
+* python build.py --download --latex --ignore-fingerprint --document D4.1_Orchestrator_prototype
+
