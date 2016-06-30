@@ -403,6 +403,9 @@ def preProcessLatex(docdir):
                      doc,
                      flags=re.S)
 
+        # allow to manually add horizontal rules to a wiki table by adding {midrule} to the end of the last cell of a row (a not so nice solution, but we need it quick)
+        doc = doc.replace("\\{midrule\\}", "\\tabularnewline\\midrule")
+
         # second, lets create labels from the text after a hashmark of a caption:
         doc = re.sub(r'\\includegraphics{(.*?)}\n\\caption{(.*?)(\\#(.*?))(\\#(.*?))?}',
                      # r'\caption{\1}\label{\3}',
@@ -419,6 +422,7 @@ def preProcessLatex(docdir):
         doc = re.sub(r'\\label{(.*?)}',
                      lambda m: '\label{' + re.sub(r'\\', '', m.group(1)) + '}',
                      doc)
+
 
         # looks not necessary on account of autoref:
         # # foruth, turn any \url references into proper refs, unless they point to a true http
