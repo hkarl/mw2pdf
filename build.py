@@ -404,7 +404,7 @@ def preProcessLatex(docdir):
                      flags=re.S)
 
         # allow to manually add horizontal rules to a wiki table by adding {midrule} to the end of the last cell of a row (a not so nice solution, but we need it quick)
-        doc = doc.replace("\\{midrule\\}", "\\tabularnewline\\midrule")
+        doc = doc.replace("\\{midrule\\}\\tabularnewline", "\\tabularnewline\\midrule")
 
         # second, lets create labels from the text after a hashmark of a caption:
         doc = re.sub(r'\\includegraphics{(.*?)}\n\\caption{(.*?)(\\#(.*?))(\\#(.*?))?}',
