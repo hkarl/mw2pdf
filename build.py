@@ -438,6 +438,10 @@ def preProcessLatex(docdir):
             fhandle.write(doc)
 
 
+def processSpellcheck(docname):
+    print docname
+    exit(1)
+
 def processLatex(docname):
 
     def oneRunLatex(docname):
@@ -496,7 +500,8 @@ def processDocument(docname,
                     downloadFlag,
                     latexFlag,
                     umlFlag,
-                    embeddedElemetsFlag):
+                    embeddedElemetsFlag,
+                    spellcheckFlag):
     global bibtexkeys
 
     print "========================================"
@@ -651,6 +656,8 @@ def processDocument(docname,
     e = None
     if (not fingerprint == newfingerprint):
         preProcessLatex(os.path.join(docname, 'tex'))
+        if spellcheckFlag:
+            processSpellcheck(docname)
         if latexFlag:
             e = processLatex(docname)
     else:
@@ -708,6 +715,13 @@ def setup_cli_parser():
                         default=False,
                         action="store_true",
                         help="Run the plantuml conversion script  (default: False)"
+                        )
+
+    parser.add_argument("--spellcheck",
+                        dest="spellcheck",
+                        default=False,
+                        action="store_true",
+                        help="Run hunspell and highlight typos in the generated PDF (default: False)"
                         )
 
     parser.add_argument("-p",
@@ -786,7 +800,8 @@ def main(args):
                                    args.download,
                                    args.latex,
                                    args.uml,
-                                   not args.noEmbeddedElements)
+                                   not args.noEmbeddedElements,
+                                   args.spellcheck)
 
 
         if ((not fingerprints[line] == newfp) or
