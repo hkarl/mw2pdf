@@ -19,6 +19,7 @@ from collections import defaultdict
 import itertools
 import argparse
 import tarfile
+import hunspell
 
 import wikiconnector as wiki
 import path_checksum
@@ -197,7 +198,7 @@ def processPandoc(doc, directory):
     assert output == ""
 
 
-def processFile(doc, directory, umlFlag):
+def processFile(doc, directory, umlFlag, spellcheckFlag):
     """process file doc in directory. Currently defined processing steps:
     - check whether it is a raw file, then just copy it and do nothing else
     - extract all included umls and run them thorugh plant uml
@@ -207,6 +208,8 @@ def processFile(doc, directory, umlFlag):
     if not processRawFile(doc, directory):
         if umlFlag:
             processUML(doc, directory)
+        if spellcheckFlag:
+            processSpellcheck(doc, directory)
         processPandoc(doc, directory)
 
 
@@ -438,31 +441,28 @@ def preProcessLatex(docdir):
             fhandle.write(doc)
 
 
-def processSpellcheck(docdir):
-    for f in glob.glob(os.path.join(docdir, '*.tex')):
-        if f.endswith('main.tex'):
-            continue
-        print "Spellcheck %r" % f
-        out = None
-        out = subprocess.check_output(
-                ['hunspell',
-                 '-l',
-                 '-t',
-                 f],
-                stderr=subprocess.STDOUT)
-        # get all misspelled words and turn them into a python set
-        badwords = set([x for x in out.split("\n") if len(x) > 0])
-        print "Spelling mistakes found: %s" % str(badwords)
-        # replace <word> in tex file with \hl{<word>}
-        for bw in badwords:
-            subprocess.call(["sed",
-                             "-i",
-                             "-e",
-                             # this would be great but it breaks to much
-                             #"s/%s/\\\emph{%s}/" % (bw, bw),
-                             "s/%s/%s/" % (bw, bw),
-                             f],
-                             stderr=subprocess.STDOUT)
+def processSpellcheck(doc, directory):
+    file = os.path.join(directory, doc) + ".md"
+    print "Doing spell check on %r" % file
+    # read md file
+    words = list()
+    with open(file, 'r') as f:
+        words = f.read().split(" ")
+    # do spell check
+    hobj = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
+    out_words = list()
+    for w in words:
+        # TODO strip \n, ., ! etc at end and start (attach later)
+        if w.isalpha():
+            if not hobj.spell(w):
+                print "Spelling mistake: %r" % w 
+                # mark mistake! we need to stick to simple ASCII chars, things like <strike> could break the latex document if they occur, e.g., in headings
+                w = "??%s??" % w
+        out_words.append(w)
+
+    # write back
+    with open(file, 'w') as f:
+        f.write(" ".join(out_words))
 
 
 def processLatex(docname):
@@ -581,7 +581,8 @@ def processDocument(docname,
 
     processFile('propertiesAbstract',
                 os.path.join(docname, 'md'),
-                umlFlag)
+                umlFlag,
+                spellcheckFlag)
 
     # -------------------------------------------
     # handle bibtex entries
@@ -627,7 +628,7 @@ def processDocument(docname,
                                             embeddedElemetsFlag)
     for doc in filelist:
         print "processing: >>", doc
-        processFile(doc, mddir, umlFlag)
+        processFile(doc, mddir, umlFlag, spellcheckFlag)
 
     # similar for possible appendices:
     appendixlist = section.downloadSectionFiles(doclines,
@@ -637,7 +638,7 @@ def processDocument(docname,
                                                 embeddedElemetsFlag)
     for doc in appendixlist:
         print "processing: >>", doc
-        processFile(doc, mddir, umlFlag)
+        processFile(doc, mddir, umlFlag, spellcheckFlag)
 
 
     #=============================================
@@ -679,8 +680,6 @@ def processDocument(docname,
     e = None
     if (not fingerprint == newfingerprint):
         preProcessLatex(os.path.join(docname, 'tex'))
-        if spellcheckFlag:
-            processSpellcheck(os.path.join(docname, 'tex'))
         if latexFlag:
             e = processLatex(docname)
     else:

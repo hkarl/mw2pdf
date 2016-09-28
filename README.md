@@ -53,14 +53,14 @@ per document
 
 * plantuml jar file is included here, but look for a more up-to-date
 version
-* python modules needed (see requirements.txt): mwclient, pypandoc, pandocfilters
-* installation: python, java, pandoc
+* python modules needed (see requirements.txt): mwclient, pypandoc, pandocfilters, hunspell
+* installation: python, java, pandoc, hunspell, libhunspell-dev
 * So basically:
-** git clone mw2pdf
-** think about whether you want a virtualenv; if so, set it up and
+ * git clone mw2pdf
+ * think about whether you want a virtualenv; if so, set it up and
 activiate it
-** pip install -r requirements.txt
-** python build.py -h
+ * pip install -r requirements.txt
+ * python build.py -h
 
 Should not take longer than five minutes if you are roughly familiar
 working with a python environment. 
@@ -69,4 +69,6 @@ working with a python environment.
 ## Examples 
 * python build.py --download --latex --ignore-fingerprint
 * python build.py --download --latex --ignore-fingerprint --document D4.1_Orchestrator_prototype
+* python build.py --download --latex --ignore-fingerprint --document WP2_Deliverable_2.2
+* python build.py --download --latex --ignore-fingerprint --document HolgersDocument
 
