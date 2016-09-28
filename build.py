@@ -438,9 +438,32 @@ def preProcessLatex(docdir):
             fhandle.write(doc)
 
 
-def processSpellcheck(docname):
-    print docname
-    exit(1)
+def processSpellcheck(docdir):
+    for f in glob.glob(os.path.join(docdir, '*.tex')):
+        if f.endswith('main.tex'):
+            continue
+        print "Spellcheck %r" % f
+        out = None
+        out = subprocess.check_output(
+                ['hunspell',
+                 '-l',
+                 '-t',
+                 f],
+                stderr=subprocess.STDOUT)
+        # get all misspelled words and turn them into a python set
+        badwords = set([x for x in out.split("\n") if len(x) > 0])
+        print "Spelling mistakes found: %s" % str(badwords)
+        # replace <word> in tex file with \hl{<word>}
+        for bw in badwords:
+            subprocess.call(["sed",
+                             "-i",
+                             "-e",
+                             # this would be great but it breaks to much
+                             #"s/%s/\\\emph{%s}/" % (bw, bw),
+                             "s/%s/%s/" % (bw, bw),
+                             f],
+                             stderr=subprocess.STDOUT)
+
 
 def processLatex(docname):
 
@@ -657,7 +680,7 @@ def processDocument(docname,
     if (not fingerprint == newfingerprint):
         preProcessLatex(os.path.join(docname, 'tex'))
         if spellcheckFlag:
-            processSpellcheck(docname)
+            processSpellcheck(os.path.join(docname, 'tex'))
         if latexFlag:
             e = processLatex(docname)
     else:
