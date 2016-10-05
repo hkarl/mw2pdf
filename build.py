@@ -445,24 +445,29 @@ def processSpellcheck(doc, directory):
     file = os.path.join(directory, doc) + ".md"
     print "Doing spell check on %r" % file
     # read md file
-    words = list()
+    lines = list()
+    out_lines = list()
     with open(file, 'r') as f:
-        words = f.read().split(" ")
-    # do spell check
-    hobj = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
-    out_words = list()
-    for w in words:
-        # TODO strip \n, ., ! etc at end and start (attach later)
-        if w.isalpha():
-            if not hobj.spell(w):
-                print "Spelling mistake: %r" % w 
-                # mark mistake! we need to stick to simple ASCII chars, things like <strike> could break the latex document if they occur, e.g., in headings
-                w = "??%s??" % w
-        out_words.append(w)
+        lines = f.readlines()
+    for line in lines:
+        words = line.strip("\n").split(" ")
+        # do spell check
+        hobj = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
+        out_words = list()
+        for w in words:
+            # generate a version of the word that does not contain any non-alpha characters
+            w_striped = w.strip(".:;,!?'_-")
+            if w_striped.isalpha():
+                if not hobj.spell(w_striped):
+                    print "Spelling mistake: %r" % w_striped
+                    # mark mistake! we need to stick to simple ASCII chars, things like <strike> could break the latex document if they occur, e.g., in headings
+                    w = w.replace(w_striped, "??%s??" % w_striped) 
+            out_words.append(w)
+        out_lines.append(" ".join(out_words))
 
     # write back
     with open(file, 'w') as f:
-        f.write(" ".join(out_words))
+        f.write("\n".join(out_lines))
 
 
 def processLatex(docname):
