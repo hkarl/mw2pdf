@@ -441,7 +441,34 @@ def preProcessLatex(docdir):
             fhandle.write(doc)
 
 
+def update_custom_dictionary(hobj, dict_wiki_page_name="Spellchecker_Dict"):
+    """
+    Download custom dictionary from wiki (if available) and add
+    the given words to our local spell checker dictionary.
+    Spell check dictionary location: http://wiki.host.tld/index.php/Spellchecker_Dict
+    """
+    print "Updating custom spell check dictionary using %r" % dict_wiki_page_name
+    # fetch
+    download(dict_wiki_page_name, "/tmp/", None, False)
+    # load
+    with open("/tmp/%s.md" % dict_wiki_page_name, 'r') as f:
+        lines = f.readlines()
+        for l in lines:
+            l = l.strip("\n *-+")
+            if l.isalpha():
+                if not hobj.spell(l):
+                    # word is not in dict, lets add it
+                    hobj.add(l)
+                    print "added %r" % l
+    print "update done."
+
+
 def processSpellcheck(doc, directory):
+    # do spell check
+    hobj = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
+    # check wiki for custom dictionary
+    update_custom_dictionary(hobj) # ugly to call it for each document :-/
+
     file = os.path.join(directory, doc) + ".md"
     print "Doing spell check on %r" % file
     # read md file
@@ -451,8 +478,6 @@ def processSpellcheck(doc, directory):
         lines = f.readlines()
     for line in lines:
         words = line.strip("\n").split(" ")
-        # do spell check
-        hobj = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
         out_words = list()
         for w in words:
             # generate a version of the word that does not contain any non-alpha characters
