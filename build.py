@@ -911,5 +911,6 @@ if __name__ == '__main__':
         args.ignoreFingerprint = False
         args.uml = True
         args.noEmbeddedElements = False
+        args.spellcheck = True
 
     main(args)
