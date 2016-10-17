@@ -198,7 +198,7 @@ def processPandoc(doc, directory):
     assert output == ""
 
 
-def processFile(doc, directory, umlFlag, spellcheckFlag):
+def processFile(doc, directory, umlFlag, spellcheckFlag, spellCheckDict):
     """process file doc in directory. Currently defined processing steps:
     - check whether it is a raw file, then just copy it and do nothing else
     - extract all included umls and run them thorugh plant uml
@@ -209,7 +209,7 @@ def processFile(doc, directory, umlFlag, spellcheckFlag):
         if umlFlag:
             processUML(doc, directory)
         if spellcheckFlag:
-            processSpellcheck(doc, directory)
+            processSpellcheck(doc, directory, spellCheckDict)
         processPandoc(doc, directory)
 
 
@@ -463,9 +463,13 @@ def update_custom_dictionary(hobj, dict_wiki_page_name="Spellchecker_Dict"):
     print "update done."
 
 
-def processSpellcheck(doc, directory):
+def processSpellcheck(doc, directory, spellCheckDict):
     # do spell check
-    hobj = hunspell.HunSpell('/usr/share/hunspell/en_US.dic', '/usr/share/hunspell/en_US.aff')
+    try:
+        hobj = hunspell.HunSpell('/usr/share/hunspell/%s.dic' % spellCheckDict, '/usr/share/hunspell/%s.aff' % spellCheckDict)
+    except:
+        print "Error: Dictionary %r not found." % spellCheckDict
+        return
     # check wiki for custom dictionary
     update_custom_dictionary(hobj) # ugly to call it for each document :-/
 
@@ -600,6 +604,26 @@ def processDocument(docname,
     # docbibtex = section.getSectionLines(doclines, 'Bibtex')
     # docwikibib = section.getSectionLines(doclines, 'Wikibib')
 
+    #=============================================
+    # process any additional properties:
+
+    properties = section.getProperties(doclines, 'Properties')
+
+    # try to extract property values needed by generator script
+    propSpellCheck = "off"
+    propSpellCheckDict = "en_GB"
+    try:
+        propSpellCheck = dict(properties).get("spellCheck", "off")
+        propSpellCheckDict = dict(properties).get("spellCheckDict", "en_GB")
+    except:
+        pass
+
+    if spellcheckFlag and "on" in propSpellCheck:
+        spellcheckFlag = True
+    else:
+        spellcheckFlag = False
+
+
     # --------------------------------------------
     # handle abstract, ensure there is always a possibly empty file
 
@@ -612,7 +636,7 @@ def processDocument(docname,
     processFile('propertiesAbstract',
                 os.path.join(docname, 'md'),
                 umlFlag,
-                spellcheckFlag)
+                spellcheckFlag, propSpellCheckDict)
 
     # -------------------------------------------
     # handle bibtex entries
@@ -658,7 +682,7 @@ def processDocument(docname,
                                             embeddedElemetsFlag)
     for doc in filelist:
         print "processing: >>", doc
-        processFile(doc, mddir, umlFlag, spellcheckFlag)
+        processFile(doc, mddir, umlFlag, spellcheckFlag, propSpellCheckDict)
 
     # similar for possible appendices:
     appendixlist = section.downloadSectionFiles(doclines,
@@ -668,13 +692,11 @@ def processDocument(docname,
                                                 embeddedElemetsFlag)
     for doc in appendixlist:
         print "processing: >>", doc
-        processFile(doc, mddir, umlFlag, spellcheckFlag)
+        processFile(doc, mddir, umlFlag, spellcheckFlag, propSpellCheckDict)
 
 
-    #=============================================
-    # process any additional properties:
 
-    properties = section.getProperties(doclines, 'Properties')
+
 
     #=============================================
     # copy figures to figures directory, fix spaces in file name!
